@@ -3,16 +3,16 @@ import math
 from random import randint
 
 class Tree(pygame.sprite.Sprite):
-	def __init__(self,pos,group):
+	def __init__(self, pos, group):
 		super().__init__(group)
-		self.image = pygame.image.load('graphics/tree.png').convert_alpha()
+		self.image = pygame.image.load('test/graphics/tree.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
 
 class Player(pygame.sprite.Sprite):
-	def __init__(self,pos,group):
+	def __init__(self, pos, group):
 		super().__init__(group)
-		self.image = pygame.image.load('graphics/pixil-frame-0.png').convert_alpha()
-		self.rect = self.image.get_rect(center = pos)
+		self.image = pygame.image.load('test/graphics/pixil-frame-0.png').convert_alpha()
+		self.rect = self.image.get_rect(center=pos)
 		self.direction = pygame.math.Vector2()
 		self.speed = 5
 
@@ -44,24 +44,19 @@ class Player(pygame.sprite.Sprite):
 class Bullet(pygame.sprite.Sprite):
 	def __init__(self, player_pos, camera_pos, group):
 		super().__init__(group)
-		self.image = pygame.Surface((10,10))
-		self.image.fill((255,0,0))
+		self.pos = pygame.math.Vector2(player_pos.center)
+		self.image = pygame.Surface((10, 10))
+		self.image.fill((255, 0, 0))
+		self.rect = self.image.get_rect(center=self.pos)
 
-		self.pos = pygame.math.Vector2()
-		self.pos.x = player_pos.x
-		self.pos.y = player_pos.y
-
-		self.rect = self.image.get_rect(center = self.pos)
-		self.direction = pygame.math.Vector2()
 		self.speed = 15
-		self.vel = pygame.math.Vector2()
-		self.angle = math.atan2(self.pos.y - pygame.mouse.get_pos()[1] - camera_pos.x ,self.pos.x - pygame.mouse.get_pos()[0] - camera_pos.y)
-		self.vel.x = self.speed * math.cos(self.angle)
-		self.vel.y = self.speed * math.sin(self.angle)
-
+		self.vel = pygame.math.Vector2(pygame.mouse.get_pos())
+		self.vel += camera_pos - player_pos.center
+		self.vel = self.vel.normalize() * self.speed
+		
 	def update(self):
-		self.rect.x -= int(self.vel.x)
-		self.rect.y -= int(self.vel.y)
+		self.pos += self.vel
+		self.rect.center = self.pos
 
 class CameraGroup(pygame.sprite.Group):
 	def __init__(self):
@@ -79,10 +74,10 @@ class CameraGroup(pygame.sprite.Group):
 		t = self.camera_borders['top']
 		w = self.display_surface.get_size()[0]  - (self.camera_borders['left'] + self.camera_borders['right'])
 		h = self.display_surface.get_size()[1]  - (self.camera_borders['top'] + self.camera_borders['bottom'])
-		self.camera_rect = pygame.Rect(l,t,w,h)
+		self.camera_rect = pygame.Rect(l, t, w, h)
 
 		# ground
-		self.ground_surf = pygame.image.load('graphics/ground.png').convert_alpha()
+		self.ground_surf = pygame.image.load('test/graphics/ground.png').convert_alpha()
 		self.ground_rect = self.ground_surf.get_rect(topleft = (0,0))
 
 		# camera speed
@@ -91,7 +86,7 @@ class CameraGroup(pygame.sprite.Group):
 
 		# zoom 
 		self.zoom_scale = 1
-		self.internal_surf_size = (2500,2500)
+		self.internal_surf_size = (2500, 2500)
 		self.internal_surf = pygame.Surface(self.internal_surf_size, pygame.SRCALPHA)
 		self.internal_rect = self.internal_surf.get_rect(center = (self.half_w,self.half_h))
 		self.internal_surface_size_vector = pygame.math.Vector2(self.internal_surf_size)
@@ -99,7 +94,7 @@ class CameraGroup(pygame.sprite.Group):
 		self.internal_offset.x = self.internal_surf_size[0] // 2 - self.half_w
 		self.internal_offset.y = self.internal_surf_size[1] // 2 - self.half_h
 
-	def center_target_camera(self,target):
+	def center_target_camera(self, target):
 		self.offset.x = target.rect.centerx - self.half_w
 		self.offset.y = target.rect.centery - self.half_h
 
@@ -110,7 +105,7 @@ class CameraGroup(pygame.sprite.Group):
 		if keys[pygame.K_e]:
 			self.zoom_scale -= 0.1
 
-	def custom_draw(self,player):
+	def custom_draw(self, player):
 		self.center_target_camera(player)
 		self.zoom_keyboard_control()
 
@@ -145,16 +140,17 @@ class FPS:
 pygame.init()
 screen = pygame.display.set_mode((1280,720))
 clock = pygame.time.Clock()
-pygame.event.set_grab(True)
-fps = FPS() 
+
+fps = FPS()
+
 # setup 
 camera_group = CameraGroup()
-player = Player((640,360),camera_group)
+player = Player((640,360), camera_group)
 
 for i in range(20):
 	random_x = randint(0,1000)
 	random_y = randint(0,1000)
-	Tree((random_x,random_y),camera_group)
+	Tree((random_x,random_y), camera_group)
 
 bullet_group = pygame.sprite.Group()
 
