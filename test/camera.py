@@ -7,14 +7,19 @@ SCREEN_HEIGHT = 720
 class Tree(pygame.sprite.Sprite):
 	def __init__(self, pos):
 		super().__init__()
-		self.image = pygame.image.load('test/graphics/tree.png').convert_alpha()
+		self.image = pygame.image.load('graphics/tree.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft=pos)
 
+	def update(self):
+		self.mask = pygame.mask.from_surface(self.image)
+		self.player_mask = pygame.mask.from_surface(player.image)
+		if pygame.sprite.spritecollide(self, pygame.sprite.GroupSingle(player), False, pygame.sprite.collide_mask):
+			self.kill()
 
 class Player(pygame.sprite.Sprite):
 	def __init__(self, pos):
 		super().__init__()
-		self.image = pygame.image.load('test/graphics/pixil-frame-0.png').convert_alpha()
+		self.image = pygame.image.load('graphics/pixil-frame-0.png').convert_alpha()
 		self.rect = self.image.get_rect(center=pos)
 		self.direction = pygame.math.Vector2()
 		self.speed = 5
@@ -60,13 +65,17 @@ class Bullet(pygame.sprite.Sprite):
 	def update(self):
 		self.pos += self.vel
 		self.rect.center = self.pos
+		self.mask = pygame.mask.from_surface(self.image)
+		self.player_mask = pygame.mask.from_surface(player.image)
+		if pygame.sprite.spritecollide(self, pygame.sprite.GroupSingle(tree_group), True, pygame.sprite.collide_mask):
+			self.kill()
 		
 
 class View:
 	def __init__(self, rect, target=None):
 		self.rect = rect
 		self.target = target
-		self.bg = pygame.image.load('test/graphics/ground.png').convert_alpha()
+		self.bg = pygame.image.load('graphics/ground.png').convert_alpha()
 		self.bg_rect = self.bg.get_rect(topleft=(0, 0))
 		self.sight_scale = 1
 
@@ -131,14 +140,28 @@ fps = FPS()
 
 group = pygame.sprite.Group()
 player = Player((640,360))
-group.add(player)
+player_group = pygame.sprite.GroupSingle(player)
+group.add(player_group)
 
 view = View(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), player)
+
+# for i in range(20):
+# 	random_x = randint(0,1000)
+# 	random_y = randint(0,1000)
+# 	group.add(Tree((random_x, random_y)))
+
+# tree_group = pygame.sprite.Group()
+# group.add(tree_group)
+
+tree_group = pygame.sprite.Group()
 
 for i in range(20):
 	random_x = randint(0,1000)
 	random_y = randint(0,1000)
-	group.add(Tree((random_x, random_y)))
+	tree_group.add(Tree((random_x, random_y)))
+
+group.add(tree_group)
+
 
 while True:
 	for event in pygame.event.get():
