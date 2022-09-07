@@ -9,16 +9,16 @@ class Tree(pygame.sprite.Sprite):
 		super().__init__()
 		self.image = pygame.image.load('graphics/tree.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft=pos)
+		self.speed = 1
 
 	def update(self):
-		self.mask = pygame.mask.from_surface(self.image)
-		self.player_mask = pygame.mask.from_surface(player.image)
 		if pygame.sprite.spritecollide(self, pygame.sprite.GroupSingle(player), False, pygame.sprite.collide_mask):
 			self.kill()
 
 class Player(pygame.sprite.Sprite):
-	def __init__(self, pos):
+	def __init__(self, pos, health):
 		super().__init__()
+		self.health = health
 		self.image = pygame.image.load('graphics/pixil-frame-0.png').convert_alpha()
 		self.rect = self.image.get_rect(center=pos)
 		self.direction = pygame.math.Vector2()
@@ -27,16 +27,16 @@ class Player(pygame.sprite.Sprite):
 	def input(self):
 		keys = pygame.key.get_pressed()
 
-		if keys[pygame.K_UP]:
+		if keys[pygame.K_w]:
 			self.direction.y = -1
-		elif keys[pygame.K_DOWN]:
+		elif keys[pygame.K_s]:
 			self.direction.y = 1
 		else:
 			self.direction.y = 0
 
-		if keys[pygame.K_RIGHT]:
+		if keys[pygame.K_d]:
 			self.direction.x = 1
-		elif keys[pygame.K_LEFT]:
+		elif keys[pygame.K_a]:
 			self.direction.x = -1
 		else:
 			self.direction.x = 0
@@ -46,11 +46,13 @@ class Player(pygame.sprite.Sprite):
 		self.rect.center += self.direction * self.speed
 
 	def create_bullet(self, camera_pos):
-		return Bullet(self.rect, camera_pos)
+		return Bullet(self.rect, camera_pos, 20)
     		
 
 class Bullet(pygame.sprite.Sprite):
-	def __init__(self, player_pos, camera_pos):
+	def __init__(self, player_pos, camera_pos, duration_limit):
+		self.duration_limit = duration_limit
+		self.dura = 0
 		super().__init__()
 		self.image = pygame.Surface((10, 10))
 		self.image.fill((255, 0, 0))
@@ -67,8 +69,11 @@ class Bullet(pygame.sprite.Sprite):
 		self.rect.center = self.pos
 		self.mask = pygame.mask.from_surface(self.image)
 		self.player_mask = pygame.mask.from_surface(player.image)
-		if pygame.sprite.spritecollide(self, pygame.sprite.GroupSingle(tree_group), True, pygame.sprite.collide_mask):
-			self.kill()
+		if self.dura <= self.duration_limit:		self.dura += 1
+		else:		self.kill()
+
+
+		if pygame.sprite.spritecollide(self, tree_group, True, pygame.sprite.collide_mask):		self.kill()
 		
 
 class View:
@@ -139,7 +144,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
 fps = FPS()
 
 group = pygame.sprite.Group()
-player = Player((640,360))
+player = Player((640,360),120)
 player_group = pygame.sprite.GroupSingle(player)
 group.add(player_group)
 
@@ -164,6 +169,7 @@ group.add(tree_group)
 
 
 while True:
+
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			pygame.quit()
@@ -172,7 +178,7 @@ while True:
 			if event.key == pygame.K_ESCAPE:
 				pygame.quit()
 				sys.exit()
-		if event.type == pygame.MOUSEBUTTONDOWN:
+		if pygame.mouse.get_pressed()[0]:
 			group.add(player.create_bullet(view.rect.topleft))
 		if event.type == pygame.MOUSEWHEEL:
 			view.sight_scale += event.y * 0.03
@@ -182,4 +188,6 @@ while True:
 	group.update()
 	fps.render(screen)
 	pygame.display.update()
+	pygame.draw.rect(screen, (255,0,0),(1200,640, 200,10))
+	pygame.draw.rect(screen, (0,0,255),(1200,6400, player.health,5))
 	fps.clock.tick(60)
