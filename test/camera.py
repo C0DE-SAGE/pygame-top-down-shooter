@@ -10,8 +10,23 @@ class Tree(pygame.sprite.Sprite):
 		self.image = pygame.image.load('graphics/tree.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft=pos)
 		self.speed = 1
+		self.direction = pygame.math.Vector2()
+	def input(self):
+		if self.rect.center[0] - player.rect.center[0] > 0:
+			self.direction.x = -1
+		else:
+			self.direction.x = 1
+		
+		if self.rect.center[1] - player.rect.center[1] > 0:
+			self.direction.y = -1
+		else:
+			self.direction.y = 1
 
 	def update(self):
+		self.input()
+
+		self.rect.center += self.direction * self.speed
+
 		if pygame.sprite.spritecollide(self, pygame.sprite.GroupSingle(player), False, pygame.sprite.collide_mask):
 			self.kill()
 
@@ -183,11 +198,10 @@ while True:
 		if event.type == pygame.MOUSEWHEEL:
 			view.sight_scale += event.y * 0.03
 
+
 	view.step()
 	view.draw(group)
 	group.update()
 	fps.render(screen)
 	pygame.display.update()
-	pygame.draw.rect(screen, (255,0,0),(1200,640, 200,10))
-	pygame.draw.rect(screen, (0,0,255),(1200,6400, player.health,5))
 	fps.clock.tick(60)
