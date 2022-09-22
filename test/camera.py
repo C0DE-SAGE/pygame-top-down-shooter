@@ -1,5 +1,6 @@
 import pygame, sys
 from random import randint
+from math import atan2, degrees, pi
 
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
@@ -66,13 +67,20 @@ class Player(pygame.sprite.Sprite):
 
 class Bullet(pygame.sprite.Sprite):
 	def __init__(self, player_pos, camera_pos, duration_limit):
+		super().__init__()
 		self.duration_limit = duration_limit
 		self.dura = 0
-		super().__init__()
-		self.image = pygame.Surface((10, 10))
-		self.image.fill((255, 0, 0))
 		self.pos = pygame.math.Vector2(player_pos.center)
+		self.image = pygame.image.load('graphics/bullet.png').convert_alpha()
 		self.rect = self.image.get_rect(center=self.pos)
+
+		dx = pygame.math.Vector2(pygame.mouse.get_pos())[0] - player_pos.center[0]
+		dy = pygame.math.Vector2(pygame.mouse.get_pos())[1] - player_pos.center[1]
+		rads = atan2(-dy, dx)
+		rads %= 2*pi
+		degs = degrees(rads)
+		
+		self.image = pygame.transform.rotate(self.image, degs)
 
 		self.speed = 15
 		self.vel = pygame.math.Vector2(pygame.mouse.get_pos()) + camera_pos - player_pos.center
