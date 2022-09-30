@@ -5,12 +5,14 @@ import ww
 from monster import *
 from player import Player
 from view import View
+from monster_constuctor import MonsterConstuctor
 
 ww.player = Player((640,360), 120)
 ww.player_group = pygame.sprite.GroupSingle(ww.player)
 ww.group.add(ww.player_group)
 ww.view = View(target=ww.player, debug=True)
 ww.tree_group = pygame.sprite.Group()
+ww.monster_constuctor = MonsterConstuctor()
 
 for i in range(20):
 	random_x = random.randint(0,1000)
@@ -27,8 +29,8 @@ while True:
 			if event.key == pygame.K_ESCAPE:
 				pygame.quit()
 				sys.exit()
-
 	ww.view.step()
 	ww.view.draw()
+	ww.monster_constuctor.update()
 	ww.group.update()
 	pygame.display.update()
