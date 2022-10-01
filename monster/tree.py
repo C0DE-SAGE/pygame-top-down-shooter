@@ -22,7 +22,7 @@ class Tree(pygame.sprite.Sprite):
 				break
 
 		self.pos += vel
-		self.rect.center = self.pos	
+		self.rect.center = self.pos	#test
 			
 		if pygame.sprite.spritecollide(self, ww.player_group, False, pygame.sprite.collide_mask):
 			self.kill()
