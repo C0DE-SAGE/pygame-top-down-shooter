@@ -7,7 +7,6 @@ class Player(pygame.sprite.Sprite):
 		super().__init__()
 		self.health = health
 		self.image = ww.Images.player
-		self.pos = pos
 		self.rect = self.image.get_rect(center=pos)
 		self.direction = pygame.math.Vector2()
 		self.speed = 5
@@ -17,8 +16,19 @@ class Player(pygame.sprite.Sprite):
 	def input(self):
 		keys = pygame.key.get_pressed()
 
-		self.direction.y = keys[pygame.K_s] - keys[pygame.K_w]
-		self.direction.x = keys[pygame.K_d] - keys[pygame.K_a]
+		if keys[pygame.K_w]:
+			self.direction.y = -1
+		elif keys[pygame.K_s]:
+			self.direction.y = 1
+		else:
+			self.direction.y = 0
+
+		if keys[pygame.K_d]:
+			self.direction.x = 1
+		elif keys[pygame.K_a]:
+			self.direction.x = -1
+		else:
+			self.direction.x = 0
 			
 		if pygame.mouse.get_pressed()[0] and self.attack_time == 0:
 			ww.group.add(Bullet(self.rect.center, 20))
@@ -26,7 +36,6 @@ class Player(pygame.sprite.Sprite):
 
 	def update(self):
 		self.input()
-		self.pos += self.direction * self.speed
-		self.rect.center = self.pos
+		self.rect.center += self.direction * self.speed
 		self.attack_time = max(self.attack_time - 1, 0)
     		
