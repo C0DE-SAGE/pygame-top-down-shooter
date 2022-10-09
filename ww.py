@@ -1,22 +1,22 @@
-from enum import IntEnum
 import pygame
-from pygame.locals import *
 import Box2D
 import math
+from pygame.locals import *
 from monster import *
 from player import Player
 from bullet import Bullet
+from enum import IntEnum
 
 SCREEN_WIDTH = 1600
 SCREEN_HEIGHT = 900
 HP_BAR_BORDER = 2
 FPS = 60
 PPM = 20
+DEBUG = False
 
 pygame.init()
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-# screen = pygame.display.set_mode()
 # screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags=OPENGL)
 
 world = Box2D.b2World(gravity=(0, 0))

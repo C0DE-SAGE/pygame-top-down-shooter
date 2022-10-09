@@ -1,14 +1,13 @@
 import pygame
-from monster import *
 import ww
+from monster import *
 
 class View:
-	def __init__(self, target=None, debug=False):
+	def __init__(self, target=None):
 		self.rect = pygame.Rect(0, 0, ww.SCREEN_WIDTH, ww.SCREEN_HEIGHT)
 		self.target = target
 		self.bg = ww.backgrounds['stage1']
 		self.bg_rect = self.bg.get_rect()
-		self.debug = debug
 		self.clock = pygame.time.Clock()
 		self.font = pygame.font.SysFont("Verdana", 20)
 		self.debug_text = []
@@ -45,14 +44,15 @@ class View:
 									(sprite.rect.width - border * 2) * sprite.hp / sprite.mhp, 8 - border * 2)
 				pygame.draw.rect(ww.screen, (255, 0, 0), hp_rect, 0, 5)
 
-		for body in ww.world.bodies:
-			for fixture in body.fixtures:
-				vertices = [body.transform * v * ww.PPM - self.rect.topleft for v in fixture.shape.vertices]
-				pygame.draw.polygon(ww.screen, (192, 32, 32), vertices, 2)
+		if ww.DEBUG:
+			for body in ww.world.bodies:
+				for fixture in body.fixtures:
+					vertices = [body.transform * v * ww.PPM - self.rect.topleft for v in fixture.shape.vertices]
+					pygame.draw.polygon(ww.screen, (192, 32, 32), vertices, 2)
 				
-		
-		self.debug_text.append(round(self.clock.get_fps(), 2))
-		self.debug_text.append(len(ww.group))
+		if ww.DEBUG:
+			self.debug_text.append(round(self.clock.get_fps(), 2))
+			self.debug_text.append(len(ww.group))
 
-		self.draw_debug_text()
+			self.draw_debug_text()
 		self.clock.tick(ww.FPS)
