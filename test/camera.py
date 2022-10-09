@@ -104,47 +104,47 @@ class View:
         self.sight_scale = 1
 
     def step(self):
-        # keys = pygame.key.get_pressed()
-        # if keys[pygame.K_q]:
-        # 	self.sight_scale += 0.01
-        # if keys[pygame.K_e] and self.sight_scale > 0.2:
-        # 	self.sight_scale -= 0.01
-        # self.rect.width = SCREEN_WIDTH * self.sight_scale
-        # self.rect.height = SCREEN_HEIGHT * self.sight_scale
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_q]:
+        	self.sight_scale += 0.01
+        if keys[pygame.K_e] and self.sight_scale > 0.2:
+        	self.sight_scale -= 0.01
+        self.rect.width = SCREEN_WIDTH * self.sight_scale
+        self.rect.height = SCREEN_HEIGHT * self.sight_scale
 
         if self.target:
             self.rect.center = self.target.rect.center
 
     def draw(self, group):
         # 확대/축소를 제거한 코드. 빠름.
+        # global screen
+        # screen.fill('#71ddee')
+        # clip_rect = self.bg_rect.clip(self.rect)
+        # screen_rect = clip_rect.move(-self.rect.left, -self.rect.top)
+        # inside_rect = clip_rect.move(-self.bg_rect.left, -self.bg_rect.top)
+        # screen.blit(self.bg, screen_rect, inside_rect)
+
+        # for sprite in sorted(group.sprites(), key=lambda sprite: sprite.rect.bottom):
+        #     clip_rect = sprite.rect.clip(self.rect)
+        #     screen_rect = clip_rect.move(-self.rect.left, -self.rect.top)
+        #     inside_rect = clip_rect.move(-sprite.rect.left, -sprite.rect.top)
+        #     screen.blit(sprite.image, screen_rect, inside_rect)
+
+        # 확대/축소를 지원하는 코드. 다소 느림.
         global screen
-        screen.fill('#71ddee')
+        surf = pygame.Surface(self.rect.size)
+        surf.fill('#71ddee')
         clip_rect = self.bg_rect.clip(self.rect)
         screen_rect = clip_rect.move(-self.rect.left, -self.rect.top)
         inside_rect = clip_rect.move(-self.bg_rect.left, -self.bg_rect.top)
-        screen.blit(self.bg, screen_rect, inside_rect)
+        surf.blit(self.bg, screen_rect, inside_rect)
 
         for sprite in sorted(group.sprites(), key=lambda sprite: sprite.rect.bottom):
             clip_rect = sprite.rect.clip(self.rect)
             screen_rect = clip_rect.move(-self.rect.left, -self.rect.top)
             inside_rect = clip_rect.move(-sprite.rect.left, -sprite.rect.top)
-            screen.blit(sprite.image, screen_rect, inside_rect)
-
-    # 확대/축소를 지원하는 코드. 다소 느림.
-    # global screen
-    # surf = pygame.Surface(self.rect.size)
-    # surf.fill('#71ddee')
-    # clip_rect = self.bg_rect.clip(self.rect)
-    # screen_rect = clip_rect.move(-self.rect.left, -self.rect.top)
-    # inside_rect = clip_rect.move(-self.bg_rect.left, -self.bg_rect.top)
-    # surf.blit(self.bg, screen_rect, inside_rect)
-
-    # for sprite in sorted(group.sprites(), key=lambda sprite: sprite.rect.bottom):
-    # 	clip_rect = sprite.rect.clip(self.rect)
-    # 	screen_rect = clip_rect.move(-self.rect.left, -self.rect.top)
-    # 	inside_rect = clip_rect.move(-sprite.rect.left, -sprite.rect.top)
-    # 	surf.blit(sprite.image, screen_rect, inside_rect)
-    # 	pygame.transform.scale(surf, (SCREEN_WIDTH, SCREEN_HEIGHT), screen)
+            surf.blit(sprite.image, screen_rect, inside_rect)
+            pygame.transform.scale(surf, (SCREEN_WIDTH, SCREEN_HEIGHT), screen)
 
 
 class FPS:
@@ -202,5 +202,5 @@ while True:
     view.draw(group)
     group.update()
     fps.render(screen)
-    pygame.display.update()
+    pygame.display.update((0, 0, 1280, 720))
     fps.clock.tick(60)

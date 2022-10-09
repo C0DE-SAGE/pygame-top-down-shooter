@@ -58,7 +58,7 @@ class ParticleNyan:
 class ParticleStar:
 	def __init__(self):
 		self.particles = []
-		self.surface = pygame.image.load('Star.png').convert_alpha()
+		self.surface = pygame.image.load('test\graphics\star.png').convert_alpha()
 		self.width = self.surface.get_rect().width
 		self.height = self.surface.get_rect().height
 
@@ -90,7 +90,7 @@ clock = pygame.time.Clock()
 
 particle1 = ParticlePrinciple()
 
-nyan_surface = pygame.image.load('nyan_cat.png').convert_alpha()
+nyan_surface = pygame.image.load('test\graphics\\nyan_cat.png').convert_alpha()
 particle2 = ParticleNyan()
 
 particle3 = ParticleStar()
