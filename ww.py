@@ -16,8 +16,8 @@ DEBUG = False
 
 pygame.init()
 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-# screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags=OPENGL)
+# screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pygame.DOUBLEBUF | pygame.OPENGL)
 
 world = Box2D.b2World(gravity=(0, 0))
 
