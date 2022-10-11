@@ -1,5 +1,5 @@
 from instance import Instance
-import ww
+import main
 from Box2D import *
 
 class Tree(Instance):
@@ -11,7 +11,7 @@ class Tree(Instance):
 
 	def update(self):
 		super().update()
-		vel = ww.player.pos - self.pos
+		vel = main.player.pos - self.pos
 		vel.Normalize()
 		self.body.linearVelocity = vel * self.speed
 

@@ -1,5 +1,5 @@
 import pygame
-import ww
+import main
 from instance import Instance
 from monster import *
 
@@ -9,7 +9,7 @@ class Bullet(Instance):
 		self.speed = 80
 		self.mhp = 20
 		self.hp = self.mhp
-		self.vel = pygame.math.Vector2(pygame.mouse.get_pos()) + ww.view.rect.topleft - pos
+		self.vel = pygame.math.Vector2(pygame.mouse.get_pos()) + main.view.rect.topleft - pos
 		self.vel.scale_to_length(self.speed)
 		deg = pygame.math.Vector2().angle_to(self.vel)
 		self.image = pygame.transform.rotate(self.image, 360 - deg)

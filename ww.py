@@ -6,6 +6,9 @@ from monster import *
 from player import Player
 from bullet import Bullet
 from enum import IntEnum
+import random
+from view import View
+
 
 SCREEN_WIDTH = 1600
 SCREEN_HEIGHT = 900
@@ -16,11 +19,20 @@ DEBUG = False
 
 pygame.init()
 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+# screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 # screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags=OPENGL)
 
 world = Box2D.b2World(gravity=(0, 0))
 
+# images = {
+#     Player: 'test/graphics/pixil-frame-0.png',
+#     Tree: 'test/graphics/tree.png',
+#     Bullet: 'test/graphics/bullet.png',
+# }
+
+# backgrounds = {
+#     'stage1': 'test/graphics/ground.png'
+# }
 images = {
     Player: pygame.image.load('test/graphics/pixil-frame-0.png').convert_alpha(),
     Tree: pygame.image.load('test/graphics/tree.png').convert_alpha(),

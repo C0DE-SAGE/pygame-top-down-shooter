@@ -1,7 +1,7 @@
 import pygame
 from instance import Instance
-import ww
 from bullet import Bullet
+import main
 
 class Player(Instance):
 	def __init__(self, pos):
@@ -21,7 +21,7 @@ class Player(Instance):
 		)
 			
 		if pygame.mouse.get_pressed()[0] and self.attack_time == 0:
-			ww.group.add(Bullet(self.pos))
+			main.group.add(Bullet(self.pos))
 			self.attack_time = self.attack_delay
 
 	def update(self):
