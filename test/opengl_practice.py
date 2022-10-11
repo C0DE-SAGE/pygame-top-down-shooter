@@ -7,7 +7,7 @@ import numpy as np
 class Plane(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__() 
-        self.image = pygame.image.load('test\graphics\VEkp8.png').convert_alpha()
+        self.image = image
         self.rect = self.image.get_rect(center = (x, y))
        
     def update(self, surface):
@@ -24,13 +24,13 @@ class Plane(pygame.sprite.Sprite):
 
 vshader = """
 #version 330
-in vec3 in_position;
+in vec2 in_position;
 in vec2 in_uv;
 out vec2 v_uv;
 void main()
 {
     v_uv = in_uv;
-    gl_Position = vec4(in_position.xy, in_position.y, 1.0);
+    gl_Position = vec4(in_position, 0.0, 1.0);
 }
 """
 
@@ -46,10 +46,12 @@ void main()
 """
 
 screen = pygame.display.set_mode((500, 500), pygame.DOUBLEBUF | pygame.OPENGL)
+
+image = pygame.image.load('test\graphics\VEkp8.png').convert_alpha()
 # screen = pygame.display.set_mode((500, 500))
 clock = pygame.time.Clock()
 
-group = pygame.sprite.Group([Plane(
+group = pygame.sprite.LayeredUpdates([Plane(
     random.random() * screen.get_rect().width,
     random.random() * screen.get_rect().height)
     for _ in range(1000)
@@ -59,7 +61,7 @@ ctx = moderngl.create_context()
 ctx.enable(moderngl.BLEND)
 program = ctx.program(vertex_shader=vshader, fragment_shader=fshader)
 vbo = ctx.buffer(None, reserve=6 * 5 * 4)
-vao = ctx.vertex_array(program, [(vbo, "3f4 2f4", "in_position", "in_uv")])
+vao = ctx.vertex_array(program, [(vbo, "2f4 2f4", "in_position", "in_uv")])
 textures = {}
 
 t = 0
@@ -83,6 +85,9 @@ while True:
     ctx.clear(0.2, 0.2, 0.2)
 
     for sprite in group:
+        group.change_layer(sprite, sprite.rect.centery)
+
+    for sprite in group:
         if not keys[pygame.K_LCTRL]:
             def convert_vertex(pt, surface):
                 return pt[0] / surface.get_width() * 2 - 1, 1 - pt[1] / surface.get_height() * 2 
@@ -93,12 +98,12 @@ while True:
                 convert_vertex(sprite.rect.topleft, screen)
             ] 
             vertices_quad_2d = np.array([
-                *corners[0], sprite.rect.centery / 500, 0.0, 1.0, 
-                *corners[1], sprite.rect.centery / 500, 1.0, 1.0, 
-                *corners[2], sprite.rect.centery / 500, 1.0, 0.0,
-                *corners[0], sprite.rect.centery / 500, 0.0, 1.0, 
-                *corners[2], sprite.rect.centery / 500, 1.0, 0.0, 
-                *corners[3], sprite.rect.centery / 500, 0.0, 0.0
+                *corners[0], 0.0, 1.0, 
+                *corners[1], 1.0, 1.0, 
+                *corners[2], 1.0, 0.0,
+                *corners[0], 0.0, 1.0, 
+                *corners[2], 1.0, 0.0, 
+                *corners[3], 0.0, 0.0
             ], dtype=np.float32)
         
         vbo.write(vertices_quad_2d)

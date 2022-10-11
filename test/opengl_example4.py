@@ -46,7 +46,9 @@ class Pygame(moderngl_window.WindowConfig):
     def render(self, time, frametime):
         # time = self.wnd.frames / 30
 
-        self.ctx.enable_only(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
+        # self.ctx.enable_only(moderngl.DEPTH_TEST)
+        # self.ctx.enable_only(moderngl.CULL_FACE)
+        # self.ctx.enable_only(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
         self.render_pygame(time)
 
         rotate = matrix44.create_from_eulers((time, time * 1.2, time * 1.3), dtype='f4')
