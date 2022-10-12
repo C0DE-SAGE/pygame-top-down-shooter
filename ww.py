@@ -12,7 +12,7 @@ SCREEN_HEIGHT = 900
 HP_BAR_BORDER = 2
 FPS = 60
 PPM = 20
-DEBUG = False
+DEBUG = True
 
 pygame.init()
 
@@ -32,7 +32,7 @@ backgrounds = {
 }
 
 def _get_ellipsis_vertices(cls, pos, size):
-    precision = 16
+    precision = 8
     vertices = []
     rect_size = images[cls].get_rect().size if cls else (1, 1)
     for i in range(precision):
