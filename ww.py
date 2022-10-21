@@ -7,8 +7,7 @@ from player import Player
 from bullet import Bullet
 from enum import IntEnum
 
-SCREEN_WIDTH = 1600
-SCREEN_HEIGHT = 900
+SCREEN_SIZE = (1600, 900)
 HP_BAR_BORDER = 2
 FPS = 60
 PPM = 20
@@ -16,19 +15,19 @@ DEBUG = True
 
 pygame.init()
 
-# screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pygame.DOUBLEBUF | pygame.OPENGL)
+pygame.display.set_mode(SCREEN_SIZE, flags=pygame.DOUBLEBUF | pygame.OPENGL)
 
 world = Box2D.b2World(gravity=(0, 0))
 
 images = {
     Player: pygame.image.load('test/graphics/pixil-frame-0.png').convert_alpha(),
     Tree: pygame.image.load('test/graphics/tree.png').convert_alpha(),
-    Bullet: pygame.image.load('test/graphics/bullet.png').convert_alpha()
+    Bullet: pygame.image.load('test/graphics/bullet.png').convert_alpha(),
+    'stage1': pygame.image.load('test/graphics/ground.png').convert_alpha()
 }
 
-backgrounds = {
-    'stage1': pygame.image.load('test/graphics/ground.png').convert_alpha()
+normals = {
+    Tree: pygame.image.load('test/graphics/tree_normal4.png').convert_alpha(),
 }
 
 def _get_ellipsis_vertices(cls, pos, size):

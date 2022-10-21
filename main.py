@@ -13,9 +13,9 @@ ww.group.add(ww.player)
 ww.view = View(target=ww.player)
 ww.monster_constructor = MonsterConstuctor()
 
-for i in range(400):
+for i in range(50):
 	random_x = random.randint(0,1000)
-	random_y = random.randint(0,1000)
+	random_y = random.randint(0,100)
 	ww.group.add(Tree((random_x, random_y)))
 
 while True:
