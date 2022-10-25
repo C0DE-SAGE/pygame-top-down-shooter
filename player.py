@@ -6,7 +6,7 @@ from bullet import Bullet
 class Player(Instance):
 	def __init__(self, pos):
 		super().__init__(pos)
-		self.speed = 25
+		self.speed = 8
 		self.mhp = 100
 		self.hp = self.mhp
 		self.attack_time = 0

@@ -10,7 +10,6 @@ class View:
 		self.target = target
 		self.bg = ww.images['stage1']
 		self.bg_rect = self.bg.get_rect()
-		self.clock = pygame.time.Clock()
 		self.font = pygame.font.SysFont("Verdana", 20)
 		self.debug_text = []
 
@@ -205,8 +204,10 @@ class View:
 		self.pg_texture.filter = moderngl.NEAREST, moderngl.NEAREST
 
 		self.texture_layer = self.ctx.texture(ww.SCREEN_SIZE, 4)
+		self.texture_layer.filter = moderngl.NEAREST, moderngl.NEAREST
 		self.texture_layer_fbo = self.ctx.framebuffer(self.texture_layer)
 		self.normal_layer = self.ctx.texture(ww.SCREEN_SIZE, 4)
+		self.normal_layer.filter = moderngl.NEAREST, moderngl.NEAREST
 		self.normal_layer_fbo = self.ctx.framebuffer(self.normal_layer)
 		self.vao2 = self.ctx.vertex_array(self.program2, [(self.vbo, "2f4 2f4", "in_position", "in_uv")])
 
@@ -279,15 +280,13 @@ class View:
 									(sprite.rect.width - border * 2) * sprite.hp / sprite.mhp, 8 - border * 2)
 				pygame.draw.rect(self.pg_screen, (255, 0, 0), hp_rect, 0, 5)
 
-		if ww.DEBUG:
-			for body in ww.world.bodies:
-				for fixture in body.fixtures:
-					vertices = [body.transform * v * ww.PPM - self.rect.topleft for v in fixture.shape.vertices]
-					pygame.draw.polygon(self.pg_screen, (192, 32, 32), vertices, 2)
+		# if ww.DEBUG:
+		# 	for body in ww.world.bodies:
+		# 		for fixture in body.fixtures:
+		# 			vertices = [body.transform * v * ww.PPM - self.rect.topleft for v in fixture.shape.vertices]
+		# 			pygame.draw.polygon(self.pg_screen, (192, 32, 32), vertices, 2)
 				
 		if ww.DEBUG:
-			self.debug_text.append(round(self.clock.get_fps(), 2))
-			self.debug_text.append(len(ww.group))
 			self.draw_debug_text()
 
 		vertices_quad_2d = get_vertices_quad(pygame.rect.Rect((0, 0), ww.SCREEN_SIZE), self.pg_screen)
@@ -328,5 +327,3 @@ class View:
 		self.normal_layer.use(location=1)
 		self.vao2.render(moderngl.TRIANGLE_FAN)
 
-
-		self.clock.tick(ww.FPS)

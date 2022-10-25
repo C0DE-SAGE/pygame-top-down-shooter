@@ -13,7 +13,7 @@ class Bullet(Instance):
 		self.vel.scale_to_length(self.speed)
 		deg = pygame.math.Vector2().angle_to(self.vel)
 		self.image_rad = (360 - deg) / 360 * 3.141592 * 2
-		self.attack = 1
+		self.attack = 5
 		
 	def update(self):
 		super().update()
