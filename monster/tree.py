@@ -5,6 +5,7 @@ from Box2D import *
 class Tree(Instance):
 	def __init__(self, pos):
 		super().__init__(pos)
+		self.sprite_index = ww.sprites['tree_idle']
 		self.speed = 5
 		self.mhp = 5
 		self.hp = self.mhp
@@ -15,5 +16,5 @@ class Tree(Instance):
 		vel.Normalize()
 		self.body.linearVelocity = vel * self.speed
 
-		if self.hp == 0:
+		if self.hp <= 0:
 			self.kill()

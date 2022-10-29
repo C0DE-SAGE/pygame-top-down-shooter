@@ -8,7 +8,7 @@ class View:
 	def __init__(self, target=None):
 		self.rect = pygame.Rect((0, 0), ww.SCREEN_SIZE)
 		self.target = target
-		self.bg = ww.images['stage1']
+		self.bg = ww.backgrounds['stage1']
 		self.bg_rect = self.bg.get_rect()
 		self.font = pygame.font.SysFont("Verdana", 20)
 		self.debug_text = []
@@ -188,16 +188,16 @@ class View:
 		self.vao = self.ctx.vertex_array(self.program, [(self.vbo, "2f4 2f4", "in_position", "in_uv")])
 		
 		self.textures = {}
-		for image in ww.images.values():
+		for image in ww.backgrounds.values():
 			texture = self.ctx.texture(image.get_size(), 4, image.get_buffer())
 			texture.swizzle = 'BGRA'
 			self.textures[image] = texture
 
-		self.normals = {}
-		for normal in ww.normals.values():
-			texture = self.ctx.texture(normal.get_size(), 4, normal.get_buffer())
-			texture.swizzle = 'BGRA'
-			self.normals[normal] = texture
+		for sprite in ww.sprites.values():
+			for image in sprite:
+				texture = self.ctx.texture(image.get_size(), 4, image.get_buffer())
+				texture.swizzle = 'BGRA'
+				self.textures[image] = texture
 
 		self.pg_screen = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
 		self.pg_texture = self.ctx.texture(self.rect.size, 4)
@@ -241,8 +241,15 @@ class View:
 				get_gl_coord(rect.topleft, screen, rad, center)
 			]
 
-		def get_vertices_quad(rect, screen, rad=0, center=None):
+		def get_vertices_quad(rect, screen, rad=0, center=None, flip=False):
 			corners = get_gl_corner(rect, screen, rad, center=center)
+			if flip:
+				return np.array([
+					*corners[0], 1.0, 1.0,
+					*corners[1], 0.0, 1.0,
+					*corners[2], 0.0, 0.0,
+					*corners[3], 1.0, 0.0,
+				], dtype=np.float32)
 			return np.array([
 				*corners[0], 0.0, 1.0,
 				*corners[1], 1.0, 1.0,
@@ -260,31 +267,32 @@ class View:
 		self.vao.render(moderngl.TRIANGLE_FAN)
 		
 		for sprite in ww.group:
-			ww.group.change_layer(sprite, sprite.pos.y)
-			sprite.rect.center = sprite.pos - self.rect.topleft
+			pos = sprite.body.transform * sprite.body.fixtures[0].shape.centroid * ww.PPM - self.rect.topleft
+			ww.group.change_layer(sprite, pos[1])
 		
 		for sprite in ww.group:
-			vertices_quad_2d = get_vertices_quad(sprite.rect, self.pg_screen, 3.14 * 2 - sprite.image_rad)
+			image = sprite.sprite_index[int(sprite.image_index)]
+			vertices_quad_2d = get_vertices_quad(image.get_rect(center=sprite.pos - self.rect.topleft), self.pg_screen, rad=3.14 * 2 - sprite.image_angle, flip=sprite.image_xflip)
 			self.vbo.write(vertices_quad_2d)
-			self.textures[sprite.image].use()
+			self.textures[image].use()
 			self.vao.render(moderngl.TRIANGLE_FAN)
 		
 		self.pg_screen.fill((0, 0, 0, 0))
-		for sprite in ww.group.sprites():
-			if isinstance(sprite, Tree):
-				hp_rect = pygame.Rect(sprite.rect.left, sprite.rect.bottom, sprite.rect.width, 8)
-				pygame.draw.rect(self.pg_screen, (0, 0, 0), hp_rect, 0, 5)
+		# for sprite in ww.group.sprites():
+		# 	if isinstance(sprite, Tree):
+		# 		hp_rect = pygame.Rect(sprite.rect.left, sprite.rect.bottom, sprite.rect.width, 8)
+		# 		pygame.draw.rect(self.pg_screen, (0, 0, 0), hp_rect, 0, 5)
 				
-				border = ww.HP_BAR_BORDER
-				hp_rect = pygame.Rect(sprite.rect.left + border, sprite.rect.bottom + border,
-									(sprite.rect.width - border * 2) * sprite.hp / sprite.mhp, 8 - border * 2)
-				pygame.draw.rect(self.pg_screen, (255, 0, 0), hp_rect, 0, 5)
+		# 		border = ww.HP_BAR_BORDER
+		# 		hp_rect = pygame.Rect(sprite.rect.left + border, sprite.rect.bottom + border,
+		# 							(sprite.rect.width - border * 2) * sprite.hp / sprite.mhp, 8 - border * 2)
+		# 		pygame.draw.rect(self.pg_screen, (255, 0, 0), hp_rect, 0, 5)
 
-		# if ww.DEBUG:
-		# 	for body in ww.world.bodies:
-		# 		for fixture in body.fixtures:
-		# 			vertices = [body.transform * v * ww.PPM - self.rect.topleft for v in fixture.shape.vertices]
-		# 			pygame.draw.polygon(self.pg_screen, (192, 32, 32), vertices, 2)
+		if ww.DEBUG:
+			for body in ww.world.bodies:
+				for fixture in body.fixtures:
+					vertices = [body.transform * v * ww.PPM - self.rect.topleft for v in fixture.shape.vertices]
+					pygame.draw.polygon(self.pg_screen, (192, 32, 32), vertices, 2)
 				
 		if ww.DEBUG:
 			self.draw_debug_text()
@@ -299,20 +307,20 @@ class View:
 
 		self.normal_layer_fbo.clear(0.5, 0.5, 1, 1)
 		self.normal_layer_fbo.use()
-		for sprite in ww.group:
-			if sprite.normal:
-				vertices_quad_2d = get_vertices_quad(sprite.rect, self.pg_screen, 3.14 * 2 - sprite.image_rad)
-				self.vbo.write(vertices_quad_2d)
-				self.normals[sprite.normal].use()
-				self.vao.render(moderngl.TRIANGLE_FAN)
+		# for sprite in ww.group:
+		# 	if sprite.normal:
+		# 		vertices_quad_2d = get_vertices_quad(sprite.rect, self.pg_screen, 3.14 * 2 - sprite.image_rad)
+		# 		self.vbo.write(vertices_quad_2d)
+		# 		self.normals[sprite.normal].use()
+		# 		self.vao.render(moderngl.TRIANGLE_FAN)
 
 
-		lightPos = []
-		for sprite in ww.group:
-			lightPos.append(get_gl_coord(sprite.rect.center, self.pg_screen))
-			lightPos[-1] = (lightPos[-1][0] / 2 + .5, lightPos[-1][1] / 2 + .5, 0)
+		# lightPos = []
+		# for sprite in ww.group:
+		# 	lightPos.append(get_gl_coord(sprite.rect.center, self.pg_screen))
+		# 	lightPos[-1] = (lightPos[-1][0] / 2 + .5, lightPos[-1][1] / 2 + .5, 0)
 
-		lightPos = [get_gl_coord(ww.player.rect.center, self.pg_screen)]
+		lightPos = [get_gl_coord(ww.player.pos, self.pg_screen)]
 		lightPos[-1] = (lightPos[-1][0] / 2 + .5, lightPos[-1][1] / 2 + .5, 0.1)
 		
 		if len(lightPos) > 60:
@@ -326,4 +334,3 @@ class View:
 		self.texture_layer.use(location=0)
 		self.normal_layer.use(location=1)
 		self.vao2.render(moderngl.TRIANGLE_FAN)
-

@@ -38,29 +38,29 @@ posIters = 10
 colors = {b2_staticBody : (255,255,255,255), b2_dynamicBody : (127,127,127,255),}
 running = True
 while running:
-    for event in pygame.event.get():
-        if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
-            running = False
-            break
+	for event in pygame.event.get():
+		if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
+			running = False
+			break
 
-    screen.fill((0, 0, 0, 0))
-    
-    overlap = False
-    for body in (ground1Body, box1Body):
-        for fixture in body.fixtures:
-            shape = fixture.shape
-            vertices = [(body.transform * v) * PPM for v in shape.vertices]
-            color = colors[body.type]
-            if body.type == b2_dynamicBody:
-                overlap = box1Body.contacts
-                if overlap:
-                    color = (255, 0, 0)
+	screen.fill((0, 0, 0, 0))
+	
+	overlap = False
+	for body in (ground1Body, box1Body):
+		for fixture in body.fixtures:
+			shape = fixture.shape
+			vertices = [(body.transform * v) * PPM for v in shape.vertices]
+			color = colors[body.type]
+			if body.type == b2_dynamicBody:
+				overlap = box1Body.contacts
+				if overlap:
+					color = (255, 0, 0)
 
-            pygame.draw.polygon(screen, color, vertices)
+			pygame.draw.polygon(screen, color, vertices)
 
-    world.Step(timeStep, velIters, posIters)
-    pygame.display.flip()
-    clock.tick(TARGET_FPS)
+	world.Step(timeStep, velIters, posIters)
+	pygame.display.flip()
+	clock.tick(TARGET_FPS)
 
 pygame.quit()
 print("done")
