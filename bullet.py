@@ -6,14 +6,15 @@ from monster import *
 class Bullet(Instance):
 	def __init__(self, pos):
 		super().__init__(pos)
+		self.sprite_index = ww.sprites['bullet_idle']
 		self.speed = 80
 		self.mhp = 20
 		self.hp = self.mhp
-		self.vel = pygame.math.Vector2(pygame.mouse.get_pos()) + ww.view.rect.topleft - pos
+		self.vel = pygame.math.Vector2(pygame.mouse.get_pos()) / (ww.WINDOW_SIZE[0] / ww.SCREEN_SIZE[0]) + ww.view.rect.topleft - pos
 		self.vel.scale_to_length(self.speed)
 		deg = pygame.math.Vector2().angle_to(self.vel)
-		self.image_rad = (360 - deg) / 360 * 3.141592 * 2
-		self.attack = 1
+		self.image_angle = deg / 360 * 3.141592 * 2
+		self.attack = 2
 		
 	def update(self):
 		super().update()
