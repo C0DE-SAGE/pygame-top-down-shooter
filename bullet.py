@@ -13,8 +13,8 @@ class Bullet(Instance):
 		self.vel = pygame.math.Vector2(pygame.mouse.get_pos()) / (ww.WINDOW_SIZE[0] / ww.SCREEN_SIZE[0]) + ww.view.rect.topleft - pos
 		self.vel.scale_to_length(self.speed)
 		deg = pygame.math.Vector2().angle_to(self.vel)
-		self.image_angle = (360 - deg) / 360 * 3.141592 * 2
-		self.attack = 5
+		self.image_angle = deg / 360 * 3.141592 * 2
+		self.attack = 2
 		
 	def update(self):
 		super().update()

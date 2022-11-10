@@ -6,6 +6,7 @@ class Tree(Instance):
 	def __init__(self, pos):
 		super().__init__(pos)
 		self.sprite_index = ww.sprites['tree_idle']
+		self.normals_index = ww.sprites['tree_idle_normal']
 		self.speed = 5
 		self.mhp = 5
 		self.hp = self.mhp

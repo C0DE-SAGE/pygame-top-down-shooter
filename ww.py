@@ -9,7 +9,6 @@ from enum import IntEnum
 
 WINDOW_SIZE = (1920, 1080)
 SCREEN_SIZE = (640, 360)
-HP_BAR_BORDER = 2
 FPS = 60
 PPM = 20
 DEBUG = True
@@ -60,8 +59,8 @@ def _get_ellipsis_vertices(sprite):
 	vertices = []
 	for i in range(precision):
 		angle = math.pi * 2 / precision * i
-		x = (math.cos(angle) * sprite.w / 2 + sprite.x) / PPM
-		y = (math.sin(angle) * sprite.h / 2 + sprite.y) / PPM
+		x = (math.cos(angle) * sprite.w / 2) / PPM
+		y = (math.sin(angle) * sprite.h / 2) / PPM
 		vertices.append(Box2D.b2Vec2(x, y))
 	return vertices
 
@@ -90,5 +89,3 @@ fixture_defs = {
 		shape=Box2D.b2PolygonShape(vertices=_get_ellipsis_vertices(basic_sprite[Bullet])),
 	),
 }
-
-print(_get_ellipsis_vertices(basic_sprite[Player]))
