@@ -1,9 +1,9 @@
 import pygame
-from instance import Instance
+from instance import LifeInstance, BrightInstance
 import ww
 from bullet import Bullet
 
-class Player(Instance):
+class Player(LifeInstance, BrightInstance):
 	def __init__(self, pos):
 		super().__init__(pos)
 		self.sprite_index = ww.sprites['player_idle']
@@ -16,8 +16,6 @@ class Player(Instance):
 
 		self.light_ambient = 0.5
 		self.light_diffuse = 0.5
-
-		
 
 	def update(self):
 		super().update()

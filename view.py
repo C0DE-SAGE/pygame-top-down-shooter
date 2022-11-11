@@ -3,6 +3,7 @@ import ww
 from monster import *
 import moderngl
 import numpy as np
+from instance import BrightInstance, LifeInstance, DrawableInstance, CollidableInstance
 
 class View:
 	MAX_NUM_LIGHT = 60
@@ -16,7 +17,7 @@ class View:
 
 		self.ctx = moderngl.create_context()
 		self.ctx.enable_only(moderngl.BLEND)
-		self.program = self.ctx.program(
+		self.shader_basic = self.ctx.program(
 			vertex_shader="""
 				#version 330
 				layout (location = 0) in vec2 in_uv;
@@ -39,7 +40,55 @@ class View:
 				}
 			"""
 		)
-		self.program2 = self.ctx.program(
+		self.shader_hit = self.ctx.program(
+			vertex_shader="""
+				#version 330
+				layout (location = 0) in vec2 in_uv;
+				layout (location = 1) in vec2 in_position;
+				out vec2 v_uv;
+				void main()
+				{
+					gl_Position = vec4(in_position, 0.0, 1.0);
+					v_uv = in_uv;
+				}
+			""",
+			fragment_shader="""
+				#version 330
+				out vec4 fragColor;
+				uniform sampler2D u_texture;
+				in vec2 v_uv;
+				void main() 
+				{
+					fragColor = texture(u_texture, v_uv);
+					fragColor = vec4(1, 1, 1, fragColor.w);
+				}
+			"""
+		)
+		self.shader_default_normal = self.ctx.program(
+			vertex_shader="""
+				#version 330
+				layout (location = 0) in vec2 in_uv;
+				layout (location = 1) in vec2 in_position;
+				out vec2 v_uv;
+				void main()
+				{
+					gl_Position = vec4(in_position, 0.0, 1.0);
+					v_uv = in_uv;
+				}
+			""",
+			fragment_shader="""
+				#version 330
+				out vec4 fragColor;
+				uniform sampler2D u_texture;
+				in vec2 v_uv;
+				void main() 
+				{
+					fragColor = texture(u_texture, v_uv);
+					fragColor = vec4(0.5, 0.5, 1, fragColor.w);
+				}
+			"""
+		)
+		self.shader_light = self.ctx.program(
 			vertex_shader="""
 				#version 330
 				in vec2 in_position;
@@ -105,12 +154,14 @@ class View:
 				}
 			""" % View.MAX_NUM_LIGHT
 		)
-		self.program2['u_texture'] = 0
-		self.program2['u_normal'] = 1
+		self.shader_light['u_texture'] = 0
+		self.shader_light['u_normal'] = 1
 
 		self.vbo = self.ctx.buffer(None, reserve=4 * 4 * 4)
-		self.vao = self.ctx.vertex_array(self.program, [(self.vbo, "2f4 2f4", "in_position", "in_uv")])
-		
+		self.vao_basic = self.ctx.vertex_array(self.shader_basic, [(self.vbo, "2f4 2f4", "in_position", "in_uv")], mode=moderngl.TRIANGLE_FAN)
+		self.vao_hit = self.ctx.vertex_array(self.shader_hit, [(self.vbo, "2f4 2f4", "in_position", "in_uv")], mode=moderngl.TRIANGLE_FAN)
+		self.vao_default_normal = self.ctx.vertex_array(self.shader_default_normal, [(self.vbo, "2f4 2f4", "in_position", "in_uv")], mode=moderngl.TRIANGLE_FAN)
+
 		images = []
 		for image in ww.backgrounds.values():
 			images.append(image)
@@ -134,7 +185,7 @@ class View:
 		self.normal_layer = self.ctx.texture(self.rect.size, 4)
 		self.normal_layer.filter = moderngl.NEAREST, moderngl.NEAREST
 		self.normal_layer_fbo = self.ctx.framebuffer(self.normal_layer)
-		self.vao2 = self.ctx.vertex_array(self.program2, [(self.vbo, "2f4 2f4", "in_position", "in_uv")])
+		self.vao_light = self.ctx.vertex_array(self.shader_light, [(self.vbo, "2f4 2f4", "in_position", "in_uv")], mode=moderngl.TRIANGLE_FAN)
 
 	def update(self):
 		if self.target:
@@ -147,9 +198,6 @@ class View:
 		self.debug_text.clear()
 
 	def draw(self):
-		def get_quad(rect):
-			return np.array([rect.topleft, rect.topright, rect.bottomright, rect.bottomleft])
-
 		def gl_scaling(quad):
 			quad = (quad - self.rect.topleft) / ww.SCREEN_SIZE * 2 - 1
 			return quad
@@ -160,14 +208,16 @@ class View:
 			])
 			return np.hstack([quad, uv]).astype(np.float32)
 
-		def draw_texture(quad, texture):
+		def draw_texture(quad, texture, vao=self.vao_basic):
+			if vao is None:
+				vao = self.vao_basic
 			if isinstance(quad, pygame.rect.Rect):
-				quad = get_quad(quad)
+				quad = np.array([quad.topleft, quad.topright, quad.bottomright, quad.bottomleft])
 			quad = gl_scaling(quad)
 			quad = attach_uv(quad)
 			self.vbo.write(quad)
 			texture.use()
-			self.vao.render(moderngl.TRIANGLE_FAN)
+			vao.render()
 
 		# Render Texture Layer
 		self.texture_layer_fbo.clear(0.5, 0.9, 0.95, 1)
@@ -177,13 +227,18 @@ class View:
 		for sprite in ww.group:
 			ww.group.change_layer(sprite, sprite.pos.y)
 		for sprite in ww.group:
-			draw_texture(sprite.get_quad(), self.textures[sprite.get_image()])
+			if isinstance(sprite, DrawableInstance):
+				if isinstance(sprite, LifeInstance) and sprite.render_hit:
+					vao = self.vao_hit
+				else:
+					vao = self.vao_basic
+				draw_texture(sprite.quad, self.textures[sprite.image], vao)
 
 		# Render Pygame Layer
 		self.pg_screen.fill((0, 0, 0, 0))
 		for sprite in ww.group:
-			if isinstance(sprite, Tree):
-				hp_rect = sprite.get_aabb_rect().move(-self.rect.left, -self.rect.top)
+			if isinstance(sprite, LifeInstance):
+				hp_rect = sprite.aabb_rect.move(-self.rect.left, -self.rect.top)
 				hp_rect = hp_rect.move(0, hp_rect.height + 2)
 				hp_rect.height = 4
 				pygame.draw.rect(self.pg_screen, (0, 0, 0), hp_rect, 0, 5)
@@ -194,8 +249,9 @@ class View:
 
 		if ww.DEBUG:
 			for sprite in ww.group:
-				vertices = sprite.get_vertices() - self.rect.topleft
-				pygame.draw.polygon(self.pg_screen, (192, 32, 32), vertices, 1)
+				if isinstance(sprite, CollidableInstance):
+					vertices = sprite.vertices - self.rect.topleft
+					pygame.draw.polygon(self.pg_screen, (192, 32, 32), vertices, 1)
 			self.draw_debug_text()
 
 		self.pg_texture.write(self.pg_screen.get_view('1'))
@@ -205,27 +261,30 @@ class View:
 		self.normal_layer_fbo.clear(0.5, 0.5, 1, 1)
 		self.normal_layer_fbo.use()
 		for sprite in ww.group:
-			normal = sprite.get_normali()
-			if normal:
-				draw_texture(sprite.get_quad(), self.textures[normal])
+			if isinstance(sprite, DrawableInstance):
+				normal = sprite.normal
+				if normal:
+					draw_texture(sprite.quad, self.textures[normal])
+				else:
+					draw_texture(sprite.quad, self.textures[sprite.image], self.vao_default_normal)
 		
 		# Lighting
 		numLight = 0
 		for sprite in ww.group:
-			if sprite.light_diffuse == 0:
+			if not isinstance(sprite, BrightInstance) or sprite.light_diffuse == 0:
 				continue
 			pos = gl_scaling(np.array(sprite.pos))
-			self.program2[f'light[{numLight}].position'].value = pos[0], -pos[1], 0.1
-			self.program2[f'light[{numLight}].ambient'].value = sprite.light_ambient, sprite.light_ambient, sprite.light_ambient
-			self.program2[f'light[{numLight}].diffuse'].value = sprite.light_diffuse, sprite.light_diffuse, sprite.light_diffuse
-			self.program2[f'light[{numLight}].constant'].value = 1.0
-			self.program2[f'light[{numLight}].linear'].value = 0.09
-			self.program2[f'light[{numLight}].quadratic'].value = 0.032
+			self.shader_light[f'light[{numLight}].position'].value = pos[0], -pos[1], 0.1
+			self.shader_light[f'light[{numLight}].ambient'].value = sprite.light_ambient, sprite.light_ambient, sprite.light_ambient
+			self.shader_light[f'light[{numLight}].diffuse'].value = sprite.light_diffuse, sprite.light_diffuse, sprite.light_diffuse
+			self.shader_light[f'light[{numLight}].constant'].value = 1.0
+			self.shader_light[f'light[{numLight}].linear'].value = 0.09
+			self.shader_light[f'light[{numLight}].quadratic'].value = 0.032
 
 			numLight += 1
 			if numLight >= self.MAX_NUM_LIGHT:
 				break
-		self.program2['numLight'].value = numLight
+		self.shader_light['numLight'].value = numLight
 
 		# Integrate Layers
 		self.ctx.screen.use()
@@ -233,7 +292,12 @@ class View:
 
 		self.texture_layer.use(location=0)
 		self.normal_layer.use(location=1)
-		self.vao2.render(moderngl.TRIANGLE_FAN)
+		self.vao_light.render()
 
 		self.pg_texture.use()
-		self.vao.render(moderngl.TRIANGLE_FAN)
+		self.vao_basic.render()
+
+		# Render PostProcess
+		for sprite in ww.group:
+			if isinstance(sprite, LifeInstance):
+				sprite.render_hit = False

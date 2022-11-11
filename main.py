@@ -39,7 +39,7 @@ while True:
 	ww.group.update()
 	ww.view.update()
 	if delayed_time < 0:
-		clock2.tick(60)
+		clock2.tick(ww.FPS)
 		ww.view.debug_text.append(round(clock.get_fps(), 2))
 		ww.view.debug_text.append(round(clock2.get_fps(), 2))
 		ww.view.debug_text.append(len(ww.group))

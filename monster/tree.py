@@ -1,8 +1,8 @@
-from instance import Instance
+from instance import LifeInstance
 import ww
 from Box2D import *
 
-class Tree(Instance):
+class Tree(LifeInstance):
 	def __init__(self, pos):
 		super().__init__(pos)
 		self.sprite_index = ww.sprites['tree_idle']
@@ -12,10 +12,7 @@ class Tree(Instance):
 		self.hp = self.mhp
 
 	def update(self):
-		super().update()
 		vel = ww.player.pos - self.pos
 		vel.Normalize()
 		self.body.linearVelocity = vel * self.speed
-
-		if self.hp <= 0:
-			self.kill()
+		super().update()
