@@ -5,6 +5,7 @@ import moderngl
 import numpy as np
 
 class View:
+	MAX_NUM_LIGHT = 60
 	def __init__(self, target=None):
 		self.rect = pygame.Rect((0, 0), ww.SCREEN_SIZE)
 		self.target = target
@@ -44,63 +45,65 @@ class View:
 				in vec2 in_position;
 				in vec2 in_uv;
 				out vec2 v_uv;
-				out vec2 pos;
+				out vec2 fragPos;
 				void main()
 				{
 					gl_Position = vec4(in_position, 0.0, 1.0);
 					v_uv = in_uv;
-					pos = in_position;
+					fragPos = in_position;
 				}
 			""",
 			fragment_shader="""
 				#version 330
+				struct Light {
+					vec3 position;  
+				
+					vec3 ambient;
+					vec3 diffuse;
+					
+					float constant;
+					float linear;
+					float quadratic;
+				};
+
 				in vec2 v_uv;
-				in vec2 pos;
+				in vec2 fragPos;
 				out vec4 fragColor;
 				uniform sampler2D u_texture;
 				uniform sampler2D u_normal;
-				uniform vec3 lightPos[60];
+				uniform Light light[%d];
+				uniform int numLight;
+
+				vec3 CalcPointLight(Light light, vec3 normal, vec3 fragPos)
+				{
+					vec3 lightDir = normalize(light.position - fragPos);
+					
+					float diff = max(dot(normal, lightDir), 0.0);
+					
+					float distance    = length(light.position - fragPos);
+					float attenuation = 1.0 / (light.constant + light.linear * distance + 
+								light.quadratic * (distance * distance));    
+					
+					vec3 ambient  = light.ambient  * texture(u_texture, v_uv).rgb;
+					vec3 diffuse  = light.diffuse  * diff * texture(u_texture, v_uv).rgb;
+					ambient  *= attenuation;
+					diffuse  *= attenuation;
+					return (ambient + diffuse);
+				}
 
 				void main() 
 				{
 					vec3 lightColor = vec3(1, 1, 1);
-					vec3 col = texture(u_texture, v_uv).rgb;
-					vec3 normal = normalize(texture(u_normal, v_uv).rgb - vec3(0.5, 0.5, 0.5));
-					normal.x = -normal.x;
-					vec3 lightDir = normalize(vec3(0, 0, 0.1) - vec3(pos, 0.0));
+					vec3 objectColor = texture(u_texture, v_uv).rgb;
 
-					float ambientStrength = 0.1;
-					vec3 ambient = ambientStrength * lightColor;
-
-					float diff = max(dot(normal, lightDir), 0.0);
-					vec3 diffuse = diff * lightColor;
-
-					vec3 result = (ambient + diffuse) * col;
-
-
-					// result = normal;
+					vec3 norm = normalize(texture(u_normal, v_uv).xyz - vec3(0.5, 0.5, 0.5));
+					norm.x = -norm.x;
+					vec3 result = vec3(0, 0, 0);
+					for(int i = 0; i < numLight; i++)
+						result += CalcPointLight(light[i], norm, vec3(fragPos.xy, 0.0));
 					fragColor = vec4(result, 1.0);
-
-					lightPos;
-					u_normal;
-					{
-						fragColor = texture(u_texture, v_uv);
-						vec3 lightColor = vec3(1, 1, 1);
-						float ambientStrength = 0.5;
-						vec3 ambient = ambientStrength * lightColor;
-						fragColor.xyz *= ambient;
-						u_normal * u_texture;
-
-						float value = 1;
-						value *= max(0.9, min(1, (distance(vec2(0.5, 0.5), v_uv) + 0.8) * 1));
-						for (int i = 0; i < 60; ++i) {
-							value *= max(0.2, min(1, distance(lightPos[i].xy, v_uv) * 10));
-						}
-						fragColor.rgb *= 1 - value;
-					}
-					
 				}
-			"""
+			""" % View.MAX_NUM_LIGHT
 		)
 		self.program2['u_texture'] = 0
 		self.program2['u_normal'] = 1
@@ -144,41 +147,6 @@ class View:
 		self.debug_text.clear()
 
 	def draw(self):
-		def get_gl_coord(pt, screen, rad=0, center=None):
-			if rad != 0:
-				center = center or (0, 0)
-				rot = np.array([
-					[np.cos(rad), -np.sin(rad)],
-					[np.sin(rad), np.cos(rad)],
-				])
-				pt = rot.dot((pt[0] - center[0], pt[1] - center[1])) + center
-			return pt[0] / screen.get_width() * 2 - 1, pt[1] / screen.get_height() * 2 - 1
-
-		def get_gl_corner(rect, screen, rad=0, center=None):
-			center = center or rect.center
-			return [
-				get_gl_coord(rect.bottomleft, screen, rad, center),
-				get_gl_coord(rect.bottomright, screen, rad, center),
-				get_gl_coord(rect.topright, screen, rad, center),
-				get_gl_coord(rect.topleft, screen, rad, center)
-			]
-
-		def get_vertices_quad(rect, screen, rad=0, center=None, flip=False):
-			corners = get_gl_corner(rect, screen, rad, center=center)
-			if flip:
-				return np.array([
-					*corners[0], 1.0, 1.0,
-					*corners[1], 0.0, 1.0,
-					*corners[2], 0.0, 0.0,
-					*corners[3], 1.0, 0.0,
-				], dtype=np.float32)
-			return np.array([
-				*corners[0], 0.0, 1.0,
-				*corners[1], 1.0, 1.0,
-				*corners[2], 1.0, 0.0,
-				*corners[3], 0.0, 0.0,
-			], dtype=np.float32)
-
 		def get_quad(rect):
 			return np.array([rect.topleft, rect.topright, rect.bottomright, rect.bottomleft])
 
@@ -201,12 +169,6 @@ class View:
 			texture.use()
 			self.vao.render(moderngl.TRIANGLE_FAN)
 
-		def draw_screen(texture):
-			quad = attach_uv(self.screen_quad)
-			self.vbo.write(quad)
-			texture.use()
-			self.vao.render(moderngl.TRIANGLE_FAN)
-		
 		# Render Texture Layer
 		self.texture_layer_fbo.clear(0.5, 0.9, 0.95, 1)
 		self.texture_layer_fbo.use()
@@ -248,19 +210,22 @@ class View:
 				draw_texture(sprite.get_quad(), self.textures[normal])
 		
 		# Lighting
-		lightPos = []
+		numLight = 0
 		for sprite in ww.group:
-			lightPos.append(gl_scaling(np.array(sprite.pos)))
-			lightPos[-1] = (lightPos[-1][0] / 2 + .5, lightPos[-1][1] / 2 + .5, 0)
+			if sprite.light_diffuse == 0:
+				continue
+			pos = gl_scaling(np.array(sprite.pos))
+			self.program2[f'light[{numLight}].position'].value = pos[0], -pos[1], 0.1
+			self.program2[f'light[{numLight}].ambient'].value = sprite.light_ambient, sprite.light_ambient, sprite.light_ambient
+			self.program2[f'light[{numLight}].diffuse'].value = sprite.light_diffuse, sprite.light_diffuse, sprite.light_diffuse
+			self.program2[f'light[{numLight}].constant'].value = 1.0
+			self.program2[f'light[{numLight}].linear'].value = 0.09
+			self.program2[f'light[{numLight}].quadratic'].value = 0.032
 
-		# lightPos = [gl_scaling(ww.player.pos, self.pg_screen)]
-		# lightPos[-1] = (lightPos[-1][0] / 2 + .5, lightPos[-1][1] / 2 + .5, 0.1)
-		
-		if len(lightPos) > 60:
-			lightPos = lightPos[:60]
-		else:
-			lightPos.extend([(-2, -2, 0) for i in range(60 - len(lightPos))])
-		self.program2['lightPos'].value = lightPos
+			numLight += 1
+			if numLight >= self.MAX_NUM_LIGHT:
+				break
+		self.program2['numLight'].value = numLight
 
 		# Integrate Layers
 		self.ctx.screen.use()

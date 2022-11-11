@@ -14,7 +14,7 @@ PPM = 20
 DEBUG = True
 
 pygame.init()
-pygame.display.set_mode(WINDOW_SIZE, flags=pygame.DOUBLEBUF | pygame.OPENGL | pygame.FULLSCREEN)
+pygame.display.set_mode(WINDOW_SIZE, flags=pygame.DOUBLEBUF | pygame.OPENGL | pygame.FULLSCREEN, vsync=1)
 
 world = Box2D.b2World(gravity=(0, 0))
 

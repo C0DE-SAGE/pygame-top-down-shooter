@@ -13,6 +13,8 @@ class Instance(pygame.sprite.Sprite):
 		self.image_angle = 0
 		self.image_xscale = 1
 		self.image_yscale = 1
+		self.light_ambient = 0
+		self.light_diffuse = 0
 
 		self.pos = Box2D.b2Vec2(pos)
 		self.body = ww.world.CreateDynamicBody(position=self.pos/ww.PPM)

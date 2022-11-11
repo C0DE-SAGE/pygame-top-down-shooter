@@ -30,3 +30,6 @@ class Bullet(Instance):
 			self.hp -= 1
 		else:
 			self.kill()
+		import math
+		x = (self.mhp - self.hp) / 5
+		self.light_diffuse = math.tanh(x) / x / 10

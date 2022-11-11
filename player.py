@@ -14,6 +14,9 @@ class Player(Instance):
 		self.attack_delay = 4
 		self.image_index = 0
 
+		self.light_ambient = 0.5
+		self.light_diffuse = 0.5
+
 		
 
 	def update(self):
