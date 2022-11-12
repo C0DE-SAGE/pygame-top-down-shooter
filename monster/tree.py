@@ -11,7 +11,7 @@ class Tree(LifeInstance):
 		self.sprite_index = ww.sprites['tree_idle']
 		self.normals_index = ww.sprites['tree_idle_normal']
 		self.speed = 5
-		self.mhp = 30
+		self.mhp = 7
 		self.hp = self.mhp
 
 	def update(self):
@@ -26,4 +26,5 @@ class Tree(LifeInstance):
 			spd = abs(np.random.normal(0, 6))
 			vel = pygame.Vector2(np.cos(dir) * spd, np.sin(dir) * spd)
 			ww.group.add(Particle2(self.pos, vel))
+			ww.view.add_shake(0.15, 0.15)
 		super().kill()

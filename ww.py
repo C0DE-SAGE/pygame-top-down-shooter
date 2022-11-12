@@ -11,7 +11,7 @@ WINDOW_SIZE = (1920, 1080)
 SCREEN_SIZE = (640, 360)
 FPS = 60
 PPM = 20
-DEBUG = True
+DEBUG = False
 
 pygame.init()
 pygame.display.set_mode(WINDOW_SIZE, flags=pygame.DOUBLEBUF | pygame.OPENGL | pygame.FULLSCREEN, vsync=1)

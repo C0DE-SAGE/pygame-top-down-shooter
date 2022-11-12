@@ -8,9 +8,15 @@ from particle import Particle, Particle2
 
 class View:
 	MAX_NUM_LIGHT = 60
+	SHAKE_INTERVAL = 3
 	def __init__(self, target=None):
 		self.rect = pygame.Rect((0, 0), ww.SCREEN_SIZE)
 		self.target = target
+		self.shake = pygame.Vector2(0, 0)
+		self.shake_t = 0
+		self.shake_pos = pygame.Vector2(0, 0)
+		self.shake_target = pygame.Vector2(0, 0)
+
 		self.bg = ww.backgrounds['stage1']
 		self.screen_quad = np.array([[-1, 1], [1, 1], [1, -1], [-1, -1]])
 		self.font = pygame.font.SysFont("Verdana", 20)
@@ -189,9 +195,22 @@ class View:
 		self.normal_layer_fbo = self.ctx.framebuffer(self.normal_layer)
 		self.vao_light = self.ctx.vertex_array(self.shader_light, [(self.vbo, "2f4 2f4", "in_position", "in_uv")], mode=moderngl.TRIANGLE_FAN)
 
+	def add_shake(self, x, y):
+		self.shake += x, y
+		self.shake_t = View.SHAKE_INTERVAL
+
 	def update(self):
+		self.shake_t += 1
+		if self.shake_t >= View.SHAKE_INTERVAL:
+			dir = np.random.uniform(0, 360)
+			self.shake_target = pygame.Vector2(np.cos(dir) * self.shake.x, np.sin(dir) * self.shake.y)
+			self.shake_t = 0
+		self.shake_pos = (self.shake_target + self.shake_pos) / 2
+
 		if self.target:
-			self.rect.center = self.target.pos
+			self.rect.center = self.target.pos + self.shake_pos
+
+		self.shake *= 0.9
 
 	def draw_debug_text(self):
 		for idx, text in enumerate(self.debug_text):
