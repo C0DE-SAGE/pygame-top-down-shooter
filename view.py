@@ -4,7 +4,7 @@ from monster import *
 import moderngl
 import numpy as np
 from instance import BrightInstance, LifeInstance, DrawableInstance, CollidableInstance
-from particle import Particle, Particle2
+from particle import Particle
 
 class View:
 	MAX_NUM_LIGHT = 60
@@ -45,10 +45,13 @@ class View:
 				#version 330
 				out vec4 fragColor;
 				uniform sampler2D u_texture;
+				uniform vec4 imageColorMul;
+				uniform vec4 imageColorAdd;
 				in vec2 v_uv;
 				void main() 
 				{
 					fragColor = texture(u_texture, v_uv);
+					fragColor = fragColor * imageColorMul + imageColorAdd;
 				}
 			"""
 		)
@@ -243,7 +246,7 @@ class View:
 			])
 			return np.hstack([quad, uv]).astype(np.float32)
 
-		def draw_texture(quad, texture, vao=self.vao_basic):
+		def draw_texture(quad, texture, vao=self.vao_basic, image_color_mul=(1, 1, 1, 1), image_color_add=(0, 0, 0, 0)):
 			if vao is None:
 				vao = self.vao_basic
 			if isinstance(quad, pygame.rect.Rect):
@@ -251,6 +254,8 @@ class View:
 			quad = gl_scaling(quad)
 			quad = attach_uv(quad)
 			self.vbo.write(quad)
+			self.shader_basic['imageColorMul'].value = image_color_mul
+			self.shader_basic['imageColorAdd'].value = image_color_add
 			texture.use()
 			vao.render()
 
@@ -260,14 +265,15 @@ class View:
 		draw_texture(self.bg.get_rect(), self.textures[self.bg])
 		
 		for sprite in ww.group:
-			ww.group.change_layer(sprite, sprite.pos.y + (isinstance(sprite, Particle) or isinstance(sprite, Particle2)) * ww.SCREEN_SIZE[1])
+			ww.group.change_layer(sprite, sprite.pos.y + isinstance(sprite, Particle) * ww.SCREEN_SIZE[1])
 		for sprite in ww.group:
 			if isinstance(sprite, DrawableInstance):
-				if isinstance(sprite, LifeInstance) and sprite.render_hit:
-					vao = self.vao_hit
-				else:
-					vao = self.vao_basic
-				draw_texture(sprite.quad, self.textures[sprite.image], vao)
+				# if isinstance(sprite, LifeInstance) and sprite.render_hit:
+				# 	vao = self.vao_hit
+				# else:
+				# 	vao = self.vao_basic
+				vao = self.vao_basic
+				draw_texture(sprite.quad, self.textures[sprite.image], vao, sprite.image_color_mul, sprite.image_color_add)
 
 		# Render Pygame Layer
 		self.pg_screen.fill((0, 0, 0, 0))
@@ -338,3 +344,5 @@ class View:
 		for sprite in ww.group:
 			if isinstance(sprite, LifeInstance):
 				sprite.render_hit = False
+				sprite.image_color_mul = 1, 1, 1, 1
+				sprite.image_color_add = 0, 0, 0, 0

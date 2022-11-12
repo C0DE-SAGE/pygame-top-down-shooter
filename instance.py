@@ -7,6 +7,7 @@ class Instance(pygame.sprite.Sprite):
 	def __init__(self, pos):
 		super().__init__()
 		self.pos = Box2D.b2Vec2(pos)
+		
 
 class DrawableInstance(Instance):
 	def __init__(self, pos):
@@ -18,6 +19,8 @@ class DrawableInstance(Instance):
 		self.image_angle = 0
 		self.image_xscale = 1
 		self.image_yscale = 1
+		self.image_color_mul = 1, 1, 1, 1
+		self.image_color_add = 0, 0, 0, 0
 
 	def update(self):
 		super().update()
@@ -99,6 +102,9 @@ class LifeInstance(CollidableInstance, DrawableInstance):
 	def update(self):
 		if self.hp <= 0:
 			self.kill()
+		if self.render_hit:
+			self.image_color_mul = 0, 0, 0, 1
+			self.image_color_add = 1, 1, 1, 0
 		super().update()
 
 	@property

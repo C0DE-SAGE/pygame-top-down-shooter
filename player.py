@@ -2,6 +2,8 @@ from instance import LifeInstance, BrightInstance, DrawableInstance
 import ww
 from bullet import Bullet
 import pygame
+from monster import *
+from monster_constuctor import MonsterConstuctor
 
 class Player(LifeInstance, BrightInstance):
 	def __init__(self, pos):
@@ -42,21 +44,30 @@ class Player(LifeInstance, BrightInstance):
 		self.attack_time = max(self.attack_time - 1, 0)
 
 	def kill(self):
-		ww.group.add(PlayerDeath(self.pos))
+		ww.group.add(PlayerDeath(self))
 		ww.view.add_flash()
+		for sprite in ww.group:
+			if isinstance(sprite, Tree):
+				sprite.kill()
+		ww.phase = ww.PHASE.DEAD
 		super().kill()
 
 
 class PlayerDeath(DrawableInstance, BrightInstance):
-	def __init__(self, pos):
-		super().__init__(pos)
+	def __init__(self, player):
+		super().__init__(player.pos)
 		self.sprite_index = ww.sprites['player_death']
 		self.image_index = 0
 		self.image_speed = 0.05
+		self.image_xscale = player.image_xscale
+		self.image_yscale = player.image_yscale
 
 		self.light_ambient = 0.5
 		self.light_diffuse = 0.5
 		self.light_color = pygame.Vector3(1, 1, 1)
 	
 	def update(self):
-		self.light_color.yz *= 0.99
+		self.light_color.yz *= 0.995
+		if self.image_index >= len(self.sprite_index.images) - 1:
+			self.image_speed = 0
+		super().update()

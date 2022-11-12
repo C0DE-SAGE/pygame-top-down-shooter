@@ -36,7 +36,8 @@ while True:
 
 	delayed_time += clock.tick() - 1000 / ww.FPS
 
-	ww.monster_constructor.update()
+	if ww.phase == ww.PHASE.PLAY:
+		ww.monster_constructor.update()
 	ww.controller.update()
 	ww.world.Step(1 / ww.FPS, 1, 1)
 	ww.group.update()

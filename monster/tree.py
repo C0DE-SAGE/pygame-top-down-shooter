@@ -2,7 +2,7 @@ from instance import LifeInstance
 import ww
 from Box2D import *
 import numpy as np
-from particle import Particle2
+from particle import Particle
 import pygame
 # from player import Player
 
@@ -25,6 +25,8 @@ class Tree(LifeInstance):
 			if ce.other.userData is ww.player:
 				ce.other.userData.hp -= self.attack
 				ce.other.userData.render_hit = True
+				ce.other.userData.image_color_mul = 0, 0, 0, 1
+				ce.other.userData.image_color_add = 1, 1, 1, 0
 				break
 
 		super().update()
@@ -34,6 +36,6 @@ class Tree(LifeInstance):
 			dir = np.random.uniform(0, 360)
 			spd = abs(np.random.normal(0, 6))
 			vel = pygame.Vector2(np.cos(dir) * spd, np.sin(dir) * spd)
-			ww.group.add(Particle2(self.pos, vel))
+			ww.group.add(Particle(ww.sprites['particle'], self.pos, vel, dur=10, image_color_mul=(1, 0, 0, 1), dspd=0.8))
 			ww.view.add_shake(0.15, 0.15)
 		super().kill()
