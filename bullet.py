@@ -13,7 +13,7 @@ class Bullet(BulletInstance, BrightInstance):
 		self.dur = 20
 		deg = pygame.math.Vector2().angle_to(self.vel)
 		self.image_angle = deg / 360 * 3.141592 * 2
-		
+
 	def update(self):
 		x = 1 - np.cos(self.t / self.dur * 2 * np.pi)
 		self.light_diffuse = x * 0.05

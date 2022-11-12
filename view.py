@@ -9,13 +9,18 @@ from particle import Particle, Particle2
 class View:
 	MAX_NUM_LIGHT = 60
 	SHAKE_INTERVAL = 3
+	FLASH_DURATION = 10
 	def __init__(self, target=None):
 		self.rect = pygame.Rect((0, 0), ww.SCREEN_SIZE)
 		self.target = target
+
 		self.shake = pygame.Vector2(0, 0)
 		self.shake_t = 0
 		self.shake_pos = pygame.Vector2(0, 0)
 		self.shake_target = pygame.Vector2(0, 0)
+
+		self.flash = 0
+		self.flash_t = View.FLASH_DURATION
 
 		self.bg = ww.backgrounds['stage1']
 		self.screen_quad = np.array([[-1, 1], [1, 1], [1, -1], [-1, -1]])
@@ -112,7 +117,8 @@ class View:
 			fragment_shader="""
 				#version 330
 				struct Light {
-					vec3 position;  
+					vec3 position;
+					vec3 color;
 				
 					vec3 ambient;
 					vec3 diffuse;
@@ -129,6 +135,7 @@ class View:
 				uniform sampler2D u_normal;
 				uniform Light light[%d];
 				uniform int numLight;
+				uniform vec4 flashColor;
 
 				vec3 CalcPointLight(Light light, vec3 normal, vec3 fragPos)
 				{
@@ -144,20 +151,19 @@ class View:
 					vec3 diffuse  = light.diffuse  * diff * texture(u_texture, v_uv).rgb;
 					ambient  *= attenuation;
 					diffuse  *= attenuation;
-					return (ambient + diffuse);
+					return (ambient + diffuse) * light.color;
 				}
 
 				void main() 
 				{
-					vec3 lightColor = vec3(1, 1, 1);
-					vec3 objectColor = texture(u_texture, v_uv).rgb;
-
 					vec3 norm = normalize(texture(u_normal, v_uv).xyz - vec3(0.5, 0.5, 0.5));
 					norm.x = -norm.x;
 					vec3 result = vec3(0, 0, 0);
 					for(int i = 0; i < numLight; i++)
 						result += CalcPointLight(light[i], norm, vec3(fragPos.xy, 0.0));
+					result = result * (1 - flashColor.a) + flashColor.rgb * flashColor.a;
 					fragColor = vec4(result, 1.0);
+					flashColor;
 				}
 			""" % View.MAX_NUM_LIGHT
 		)
@@ -199,8 +205,10 @@ class View:
 		self.shake += x, y
 		self.shake_t = View.SHAKE_INTERVAL
 
+	def add_flash(self):
+		self.flash_t = 0
+
 	def update(self):
-		self.shake_t += 1
 		if self.shake_t >= View.SHAKE_INTERVAL:
 			dir = np.random.uniform(0, 360)
 			self.shake_target = pygame.Vector2(np.cos(dir) * self.shake.x, np.sin(dir) * self.shake.y)
@@ -209,8 +217,14 @@ class View:
 
 		if self.target:
 			self.rect.center = self.target.pos + self.shake_pos
-
 		self.shake *= 0.9
+		self.shake_t += 1
+
+		if self.flash_t < View.FLASH_DURATION:
+			self.flash = (np.cos(self.flash_t / View.FLASH_DURATION * np.pi) + 1) / 2
+			self.flash_t += 1
+		else:
+			self.flash = 0
 
 	def draw_debug_text(self):
 		for idx, text in enumerate(self.debug_text):
@@ -296,6 +310,7 @@ class View:
 				continue
 			pos = gl_scaling(np.array(sprite.pos))
 			self.shader_light[f'light[{numLight}].position'].value = pos[0], -pos[1], 0.1
+			self.shader_light[f'light[{numLight}].color'].value = sprite.light_color
 			self.shader_light[f'light[{numLight}].ambient'].value = sprite.light_ambient, sprite.light_ambient, sprite.light_ambient
 			self.shader_light[f'light[{numLight}].diffuse'].value = sprite.light_diffuse, sprite.light_diffuse, sprite.light_diffuse
 			self.shader_light[f'light[{numLight}].constant'].value = 1.0
@@ -306,6 +321,7 @@ class View:
 			if numLight >= self.MAX_NUM_LIGHT:
 				break
 		self.shader_light['numLight'].value = numLight
+		self.shader_light['flashColor'].value = 1, 1, 1, self.flash
 
 		# Integrate Layers
 		self.ctx.screen.use()

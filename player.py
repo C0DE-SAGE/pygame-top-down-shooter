@@ -1,6 +1,7 @@
-from instance import LifeInstance, BrightInstance
+from instance import LifeInstance, BrightInstance, DrawableInstance
 import ww
 from bullet import Bullet
+import pygame
 
 class Player(LifeInstance, BrightInstance):
 	def __init__(self, pos):
@@ -39,3 +40,23 @@ class Player(LifeInstance, BrightInstance):
 			self.image_index = 0
 			
 		self.attack_time = max(self.attack_time - 1, 0)
+
+	def kill(self):
+		ww.group.add(PlayerDeath(self.pos))
+		ww.view.add_flash()
+		super().kill()
+
+
+class PlayerDeath(DrawableInstance, BrightInstance):
+	def __init__(self, pos):
+		super().__init__(pos)
+		self.sprite_index = ww.sprites['player_death']
+		self.image_index = 0
+		self.image_speed = 0.05
+
+		self.light_ambient = 0.5
+		self.light_diffuse = 0.5
+		self.light_color = pygame.Vector3(1, 1, 1)
+	
+	def update(self):
+		self.light_color.yz *= 0.99

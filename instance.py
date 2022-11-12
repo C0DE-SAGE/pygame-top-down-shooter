@@ -84,6 +84,7 @@ class BrightInstance(Instance):
 		super().__init__(pos)
 		self.light_ambient = 0
 		self.light_diffuse = 0
+		self.light_color = 1, 1, 1
 
 	def kill(self):
 		super().kill()
