@@ -34,6 +34,14 @@ class Sprite:
 		data = json.loads((path / 'meta.json').read_text())
 		for key, value in data.items():
 			setattr(self, key, value)
+		if not hasattr(self, 'l'):
+			self.l = 0
+		if not hasattr(self, 'r'):
+			self.r = self.images[0].get_width()
+		if not hasattr(self, 't'):
+			self.t = 0
+		if not hasattr(self, 'b'):
+			self.b = self.images[0].get_height()
 		if not hasattr(self, 'x'):
 			self.x = (self.l + self.r) // 2
 		if not hasattr(self, 'y'):

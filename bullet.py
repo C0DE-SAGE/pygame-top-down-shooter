@@ -3,6 +3,7 @@ import ww
 from instance import BulletInstance, BrightInstance
 from monster import *
 import numpy as np
+from particle import Particle
 
 class Bullet(BulletInstance, BrightInstance):
 	def __init__(self, pos):
@@ -22,6 +23,8 @@ class Bullet(BulletInstance, BrightInstance):
 				ce.other.userData.hp -= self.attack
 				ce.other.userData.render_hit = True
 				self.t = self.dur
+				for _ in range(np.random.randint(2, 4)):
+					ww.group.add(Particle(self.pos, self.vel))
 				break
 
 		super().update()

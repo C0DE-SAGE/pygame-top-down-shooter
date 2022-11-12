@@ -1,4 +1,5 @@
 import pygame
+import ww
 
 class Controller:
     def __init__(self):
@@ -59,3 +60,7 @@ class Controller:
     @property
     def mouse_left_down(self):
         return self._mouses[0]
+
+    @property
+    def mouse_pos(self):
+        return pygame.math.Vector2(pygame.mouse.get_pos()) / (ww.WINDOW_SIZE[0] / ww.SCREEN_SIZE[0]) + ww.view.rect.topleft

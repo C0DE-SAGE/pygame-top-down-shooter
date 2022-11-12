@@ -106,19 +106,27 @@ class LifeInstance(CollidableInstance, DrawableInstance):
 			return None
 		return self.normals_index[int(self.image_index)]
 
-class BulletInstance(CollidableInstance, DrawableInstance):
+class TemporaryInstance(Instance):
 	def __init__(self, pos):
 		super().__init__(pos)
 		self.t = 0
 		self.dur = 10
-		self.speed = 40
-		self.vel = pygame.math.Vector2(pygame.mouse.get_pos()) / (ww.WINDOW_SIZE[0] / ww.SCREEN_SIZE[0]) + ww.view.rect.topleft - pos
-		self.vel.scale_to_length(self.speed)
-		self.attack = 1
 
 	def update(self):
-		self.body.linearVelocity = self.vel
 		self.t += 1
 		if self.t >= self.dur:
 			self.kill()
+		super().update()
+
+class BulletInstance(TemporaryInstance, CollidableInstance, DrawableInstance):
+	def __init__(self, pos):
+		super().__init__(pos)
+		self.speed = 40
+		self.vel = ww.controller.mouse_pos - pos
+		self.vel.scale_to_length(self.speed)
+		self.attack = 1
+		self.body.bullet = True
+
+	def update(self):
+		self.body.linearVelocity = self.vel
 		super().update()

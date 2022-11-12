@@ -4,6 +4,7 @@ from monster import *
 import moderngl
 import numpy as np
 from instance import BrightInstance, LifeInstance, DrawableInstance, CollidableInstance
+from particle import Particle, Particle2
 
 class View:
 	MAX_NUM_LIGHT = 60
@@ -173,6 +174,7 @@ class View:
 		for image in images:
 			texture = self.ctx.texture(image.get_size(), 4, image.get_buffer())
 			texture.swizzle = 'BGRA'
+			texture.filter = moderngl.NEAREST, moderngl.NEAREST
 			self.textures[image] = texture
 
 		self.pg_screen = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
@@ -225,7 +227,7 @@ class View:
 		draw_texture(self.bg.get_rect(), self.textures[self.bg])
 		
 		for sprite in ww.group:
-			ww.group.change_layer(sprite, sprite.pos.y)
+			ww.group.change_layer(sprite, sprite.pos.y + (isinstance(sprite, Particle) or isinstance(sprite, Particle2)) * ww.SCREEN_SIZE[1])
 		for sprite in ww.group:
 			if isinstance(sprite, DrawableInstance):
 				if isinstance(sprite, LifeInstance) and sprite.render_hit:
