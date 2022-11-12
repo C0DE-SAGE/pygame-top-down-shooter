@@ -1,4 +1,3 @@
-import pygame
 from instance import LifeInstance, BrightInstance
 import ww
 from bullet import Bullet

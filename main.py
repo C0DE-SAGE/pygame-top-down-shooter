@@ -9,13 +9,13 @@ from monster_constuctor import MonsterConstuctor
 from controller import Controller
 
 ww.group = pygame.sprite.LayeredUpdates()
-ww.player = Player((0, 0))
+ww.player = Player((640, 320))
 ww.group.add(ww.player)
 ww.view = View(target=ww.player)
 ww.monster_constructor = MonsterConstuctor()
 ww.controller = Controller()
 
-for i in range(50):
+for i in range(0):
 	random_x = random.randint(0,1000)
 	random_y = random.randint(0,100)
 	ww.group.add(Tree((random_x, random_y)))
@@ -36,7 +36,7 @@ while True:
 
 	delayed_time += clock.tick() - 1000 / ww.FPS
 
-	# ww.monster_constructor.update()
+	ww.monster_constructor.update()
 	ww.controller.update()
 	ww.world.Step(1 / ww.FPS, 1, 1)
 	ww.group.update()
