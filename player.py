@@ -19,30 +19,23 @@ class Player(LifeInstance, BrightInstance):
 
 	def update(self):
 		super().update()
-		keys = pygame.key.get_pressed()
-
-		self.direction = pygame.math.Vector2(
-			keys[pygame.K_d] - keys[pygame.K_a],
-			keys[pygame.K_s] - keys[pygame.K_w]
-		)
-		if self.direction:
-			self.direction.normalize_ip()
+		self.direction = ww.controller.direction
 		self.body.linearVelocity = self.direction * self.speed
 			
-		if pygame.mouse.get_pressed()[0] and self.attack_time == 0:
+		if ww.controller.mouse_left_down and self.attack_time == 0:
 			ww.group.add(Bullet(self.pos))
 			self.attack_time = self.attack_delay
 		
-		if keys[pygame.K_d] - keys[pygame.K_a] == 1:
+		if ww.controller.horizontal == 1:
 			self.image_xscale = 1
-		if keys[pygame.K_d] - keys[pygame.K_a] == -1:
+		if ww.controller.horizontal == -1:
 			self.image_xscale = -1
 
-		if (keys[pygame.K_d] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_w]) and self.sprite_index == ww.sprites['player_idle']:
+		if ww.controller.direction and self.sprite_index == ww.sprites['player_idle']:
 			self.sprite_index = ww.sprites['player_run']
 			self.image_index = 0
 
-		if not (keys[pygame.K_d] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_w]) and self.sprite_index == ww.sprites['player_run']:
+		if not ww.controller.direction and self.sprite_index == ww.sprites['player_run']:
 			self.sprite_index = ww.sprites['player_idle']
 			self.image_index = 0
 			
