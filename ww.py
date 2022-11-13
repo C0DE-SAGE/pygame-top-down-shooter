@@ -6,11 +6,10 @@ from monster import *
 from player import Player
 from bullet import Bullet
 from enum import IntEnum, Enum, auto
-from vector import *
 
-WINDOW_SIZE = Vec2(1920, 1080)
-# WINDOW_SIZE = Vec2(1280, 720)
-SCREEN_SIZE = Vec2(640, 360)
+WINDOW_SIZE = pygame.Vector2(1920, 1080)
+# WINDOW_SIZE = pygame.Vector2(1280, 720)
+SCREEN_SIZE = pygame.Vector2(640, 360)
 FPS = 60
 PPM = 20
 DEBUG = True

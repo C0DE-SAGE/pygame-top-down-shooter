@@ -4,7 +4,6 @@ from instance import BulletInstance, BrightInstance
 from monster import *
 import numpy as np
 from particle import Particle
-from vector import *
 
 class Bullet(BulletInstance, BrightInstance):
 	def __init__(self, pos):
@@ -22,8 +21,8 @@ class Bullet(BulletInstance, BrightInstance):
 			if isinstance(ce.other.userData, Tree):
 				ce.other.userData.hp -= self.attack
 				ce.other.userData.render_hit = True
-				ce.other.userData.image_color_mul = Vec4(0, 0, 0, 1)
-				ce.other.userData.image_color_add = Vec4(1, 1, 1, 0)
+				ce.other.userData.image_color_mul = 0, 0, 0, 1
+				ce.other.userData.image_color_add = 1, 1, 1, 0
 				self.t = self.dur
 				for _ in range(np.random.randint(2, 4)):
 					ww.group.add(Particle(ww.sprites['particle'], self.pos, self.vel))

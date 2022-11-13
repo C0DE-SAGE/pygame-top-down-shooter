@@ -4,7 +4,6 @@ from Box2D import *
 import numpy as np
 from particle import Particle
 import pygame
-from vector import *
 # from player import Player
 
 class Tree(LifeInstance):
@@ -36,7 +35,7 @@ class Tree(LifeInstance):
 		for _ in range(np.random.randint(15, 20)):
 			dir = np.random.uniform(0, 360)
 			spd = abs(np.random.normal(0, 6))
-			vel = Vec2(np.cos(dir) * spd, np.sin(dir) * spd)
+			vel = pygame.Vector2(np.cos(dir) * spd, np.sin(dir) * spd)
 			ww.group.add(Particle(ww.sprites['particle'], self.pos, vel, dur=10, image_color_mul=(1, 0, 0, 1), dspd=0.8))
 			ww.view.add_shake(0.15, 0.15)
 		super().kill()

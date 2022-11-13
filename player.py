@@ -4,7 +4,6 @@ from bullet import Bullet
 import pygame
 from monster import *
 from monster_constuctor import MonsterConstuctor
-from vector import *
 
 class Player(LifeInstance, BrightInstance):
 	def __init__(self, pos):
@@ -64,7 +63,7 @@ class PlayerDeath(DrawableInstance, BrightInstance):
 
 		self.light_ambient = 0.5
 		self.light_diffuse = 0.5
-		self.light_color = Vec3(1, 1, 1)
+		self.light_color = pygame.Vector3(1, 1, 1)
 	
 	def update(self):
 		self.light_color.yz *= 0.995

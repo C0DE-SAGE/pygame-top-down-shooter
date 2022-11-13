@@ -1,12 +1,11 @@
 import pygame
 import ww
 import numpy as np
-from vector import *
 
 class Instance(pygame.sprite.Sprite):
 	def __init__(self, pos):
 		super().__init__()
-		self.pos = Vec2(pos)
+		self.pos = pygame.Vector2(pos)
 		
 
 class DrawableInstance(Instance):
@@ -17,9 +16,9 @@ class DrawableInstance(Instance):
 		self.image_index = 0
 		self.image_speed = 0.2
 		self.image_angle = 0
-		self.image_scale = Vec2(1, 1)
-		self.image_color_mul = Vec4(1, 1, 1, 1)
-		self.image_color_add = Vec4(0, 0, 0, 0)
+		self.image_scale = pygame.Vector2(1, 1)
+		self.image_color_mul = 1, 1, 1, 1
+		self.image_color_add = 0, 0, 0, 0
 
 	def update(self):
 		super().update()
@@ -88,7 +87,7 @@ class BrightInstance(Instance):
 		super().__init__(pos)
 		self.light_ambient = 0
 		self.light_diffuse = 0
-		self.light_color = Vec3(1, 1, 1)
+		self.light_color = pygame.Vector3(1, 1, 1)
 
 	def kill(self):
 		super().kill()
@@ -105,12 +104,12 @@ class LifeInstance(CollidableInstance, DrawableInstance):
 		if self.hp <= 0:
 			self.kill()
 		if self.render_hit:
-			self.image_color_mul = Vec4(0, 0, 0, 1)
-			self.image_color_add = Vec4(1, 1, 1, 0)
+			self.image_color_mul = 0, 0, 0, 1
+			self.image_color_add = 1, 1, 1, 0
 			self.render_hit = False
 		else:
-			self.image_color_mul = Vec4(1, 1, 1, 1)
-			self.image_color_add = Vec4(0, 0, 0, 0)
+			self.image_color_mul = 1, 1, 1, 1
+			self.image_color_add = 0, 0, 0, 0
 		super().update()
 
 	@property

@@ -5,7 +5,6 @@ import moderngl
 import numpy as np
 from instance import BrightInstance, LifeInstance, DrawableInstance, CollidableInstance
 from particle import Particle
-from vector import *
 
 class View:
 	MAX_NUM_LIGHT = 60
@@ -15,10 +14,10 @@ class View:
 		self.rect = pygame.Rect((0, 0), ww.SCREEN_SIZE)
 		self.target = target
 
-		self.shake = Vec2(0, 0)
+		self.shake = pygame.Vector2(0, 0)
 		self.shake_t = 0
-		self.shake_pos = Vec2(0, 0)
-		self.shake_target = Vec2(0, 0)
+		self.shake_pos = pygame.Vector2(0, 0)
+		self.shake_target = pygame.Vector2(0, 0)
 
 		self.flash = 0
 		self.flash_t = View.FLASH_DURATION
@@ -165,7 +164,7 @@ class View:
 	def update(self):
 		if self.shake_t >= View.SHAKE_INTERVAL:
 			dir = np.random.uniform(0, 360)
-			self.shake_target = Vec2(np.cos(dir) * self.shake.x, np.sin(dir) * self.shake.y)
+			self.shake_target = pygame.Vector2(np.cos(dir) * self.shake.x, np.sin(dir) * self.shake.y)
 			self.shake_t = 0
 		self.shake_pos = (self.shake_target + self.shake_pos) / 2
 

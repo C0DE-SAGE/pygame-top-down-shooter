@@ -1,7 +1,7 @@
 import ww
 from monster import *
 import numpy as np
-from vector import *
+import pygame
 
 class MonsterConstuctor:
 	def __init__(self):
@@ -15,7 +15,7 @@ class MonsterConstuctor:
 		self.t += 1
 		if self.t == self.dur:
 			sprite = ww.sprites['tree_idle']
-			r = Vec2(sprite.images[0].get_bounding_rect().size)
+			r = pygame.Vector2(sprite.images[0].get_bounding_rect().size)
 			size = ww.SCREEN_SIZE + r
 			line = np.random.uniform(0, (size.x + size.y) * 2)
 			pos = -(r - (sprite.x, sprite.y))
