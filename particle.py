@@ -1,6 +1,4 @@
-from instance import TemporaryInstance, DrawableInstance
-import ww
-import pygame
+from instance import DrawableInstance
 import numpy as np
 
 class Particle(DrawableInstance):
@@ -8,13 +6,11 @@ class Particle(DrawableInstance):
 		super().__init__(pos)
 		self.sprite_index = sprite_index
 		self.dur = dur
-		vel.x += np.random.normal(scale=4)
-		vel.y += np.random.normal(scale=4)
+		vel.xy += np.random.normal(scale=4), np.random.normal(scale=4)
 		pos += vel
 		self.vel = vel
-		self.image_angle = pygame.Vector2().angle_to(self.vel) / 360 * 3.141592 * 2
-		self.image_xscale = 2
-		self.image_yscale = 1
+		self.image_angle = -(np.arctan2(*self.vel)) + np.pi / 2
+		self.image_scale.xy = 2, 1
 		self.image_speed = 0
 		self.image_index = 0
 		self.image_color_mul = image_color_mul
@@ -23,7 +19,7 @@ class Particle(DrawableInstance):
 	def update(self):
 		self.pos += self.vel
 		self.vel *= self.dspd
-		self.image_xscale *= 0.8
+		self.image_scale.x *= 0.8
 		if np.linalg.norm(self.vel) < 0.1:
 			self.kill()
 		super().update()

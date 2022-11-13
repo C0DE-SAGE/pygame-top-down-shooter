@@ -6,13 +6,14 @@ from monster import *
 from player import Player
 from bullet import Bullet
 from enum import IntEnum, Enum, auto
+from vector import *
 
-WINDOW_SIZE = (1920, 1080)
-# WINDOW_SIZE = (1280, 720)
-SCREEN_SIZE = (640, 360)
+WINDOW_SIZE = Vec2(1920, 1080)
+# WINDOW_SIZE = Vec2(1280, 720)
+SCREEN_SIZE = Vec2(640, 360)
 FPS = 60
 PPM = 20
-DEBUG = False
+DEBUG = True
 
 class PHASE(Enum):
 	TITLE = auto()
@@ -81,7 +82,7 @@ def _get_ellipsis_vertices(sprite):
 		angle = math.pi * 2 / precision * i
 		x = (math.cos(angle) * sprite.w / 2) / PPM
 		y = (math.sin(angle) * sprite.h / 2) / PPM
-		vertices.append(Box2D.b2Vec2(x, y))
+		vertices.append([x, y])
 	return vertices
 
 class CategoryBits(IntEnum):

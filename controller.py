@@ -1,5 +1,6 @@
 import pygame
 import ww
+from vector import *
 
 class Controller:
     def __init__(self):
@@ -52,10 +53,10 @@ class Controller:
 
     @property
     def direction(self):
-        dir = pygame.Vector2(self.horizontal, self.vertical)
-        if dir:
-            dir.normalize_ip()
-        return dir
+        dir = Vec2(self.horizontal, self.vertical)
+        if not dir:
+            return dir
+        return dir / np.linalg.norm(dir)
 
     @property
     def mouse_left_down(self):
@@ -63,4 +64,4 @@ class Controller:
 
     @property
     def mouse_pos(self):
-        return pygame.Vector2(pygame.mouse.get_pos()) / (ww.WINDOW_SIZE[0] / ww.SCREEN_SIZE[0]) + ww.view.rect.topleft
+        return Vec2(pygame.mouse.get_pos()) / (ww.WINDOW_SIZE.x / ww.SCREEN_SIZE.x) + ww.view.rect.topleft

@@ -1,6 +1,7 @@
 import ww
 from monster import *
 import numpy as np
+from vector import *
 
 class MonsterConstuctor:
 	def __init__(self):
@@ -14,26 +15,22 @@ class MonsterConstuctor:
 		self.t += 1
 		if self.t == self.dur:
 			sprite = ww.sprites['tree_idle']
-			rw = sprite.images[0].get_bounding_rect().width
-			rh = sprite.images[0].get_bounding_rect().height
-			w = ww.SCREEN_SIZE[0] + rw
-			h = ww.SCREEN_SIZE[1] + rh
-			line = np.random.uniform(0, (w + h) * 2)
-			x = -(rw - sprite.x)
-			y = -(rh - sprite.y)
-			l = min(line, w)
-			line = max(0, line - w)
-			x += l
-			l = min(line, h)
-			line = max(0, line - h)
-			y += l
-			l = min(line, w)
-			line = max(0, line - w)
-			x -= l
-			l = min(line, h)
-			line = max(0, line - h)
-			y -= l
-			x += ww.view.rect.left
-			y += ww.view.rect.top
-			ww.group.add(Tree((x, y)))
+			r = Vec2(sprite.images[0].get_bounding_rect().size)
+			size = ww.SCREEN_SIZE + r
+			line = np.random.uniform(0, (size.x + size.y) * 2)
+			pos = -(r - (sprite.x, sprite.y))
+			l = min(line, size.x)
+			line = max(0, line - size.x)
+			pos.x += l
+			l = min(line, size.y)
+			line = max(0, line - size.y)
+			pos.y += l
+			l = min(line, size.x)
+			line = max(0, line - size.x)
+			pos.x -= l
+			l = min(line, size.y)
+			line = max(0, line - size.y)
+			pos.y -= l
+			pos += ww.view.rect.topleft
+			ww.group.add(Tree(pos))
 			self.t = 0

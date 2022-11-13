@@ -4,6 +4,7 @@ from bullet import Bullet
 import pygame
 from monster import *
 from monster_constuctor import MonsterConstuctor
+from vector import *
 
 class Player(LifeInstance, BrightInstance):
 	def __init__(self, pos):
@@ -29,10 +30,10 @@ class Player(LifeInstance, BrightInstance):
 			self.attack_time = self.attack_delay
 		
 		if ww.controller.horizontal == 1:
-			self.image_xscale = 1
+			self.image_scale.x = 1
 		if ww.controller.horizontal == -1:
-			self.image_xscale = -1
-
+			self.image_scale.x = -1
+			
 		if ww.controller.direction and self.sprite_index == ww.sprites['player_idle']:
 			self.sprite_index = ww.sprites['player_run']
 			self.image_index = 0
@@ -59,12 +60,11 @@ class PlayerDeath(DrawableInstance, BrightInstance):
 		self.sprite_index = ww.sprites['player_death']
 		self.image_index = 0
 		self.image_speed = 0.05
-		self.image_xscale = player.image_xscale
-		self.image_yscale = player.image_yscale
+		self.image_scale = player.image_scale
 
 		self.light_ambient = 0.5
 		self.light_diffuse = 0.5
-		self.light_color = pygame.Vector3(1, 1, 1)
+		self.light_color = Vec3(1, 1, 1)
 	
 	def update(self):
 		self.light_color.yz *= 0.995

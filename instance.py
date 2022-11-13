@@ -1,12 +1,12 @@
 import pygame
 import ww
-import Box2D
 import numpy as np
+from vector import *
 
 class Instance(pygame.sprite.Sprite):
 	def __init__(self, pos):
 		super().__init__()
-		self.pos = Box2D.b2Vec2(pos)
+		self.pos = Vec2(pos)
 		
 
 class DrawableInstance(Instance):
@@ -17,10 +17,9 @@ class DrawableInstance(Instance):
 		self.image_index = 0
 		self.image_speed = 0.2
 		self.image_angle = 0
-		self.image_xscale = 1
-		self.image_yscale = 1
-		self.image_color_mul = 1, 1, 1, 1
-		self.image_color_add = 0, 0, 0, 0
+		self.image_scale = Vec2(1, 1)
+		self.image_color_mul = Vec4(1, 1, 1, 1)
+		self.image_color_add = Vec4(0, 0, 0, 0)
 
 	def update(self):
 		super().update()
@@ -37,7 +36,7 @@ class DrawableInstance(Instance):
 		R[1][0] = np.sin(self.image_angle)
 		R[0][1] = -R[1][0]
 		S = np.identity(3)
-		S[0][0], S[1][1] = self.image_xscale, self.image_yscale
+		S[0][0], S[1][1] = self.image_scale
 		T = np.identity(3)
 		T[0][2], T[1][2] = np.floor(self.pos)
 		P = np.ones((3, 4))
@@ -89,7 +88,7 @@ class BrightInstance(Instance):
 		super().__init__(pos)
 		self.light_ambient = 0
 		self.light_diffuse = 0
-		self.light_color = 1, 1, 1
+		self.light_color = Vec3(1, 1, 1)
 
 	def kill(self):
 		super().kill()
@@ -106,12 +105,12 @@ class LifeInstance(CollidableInstance, DrawableInstance):
 		if self.hp <= 0:
 			self.kill()
 		if self.render_hit:
-			self.image_color_mul = 0, 0, 0, 1
-			self.image_color_add = 1, 1, 1, 0
+			self.image_color_mul = Vec4(0, 0, 0, 1)
+			self.image_color_add = Vec4(1, 1, 1, 0)
 			self.render_hit = False
 		else:
-			self.image_color_mul = 1, 1, 1, 1
-			self.image_color_add = 0, 0, 0, 0
+			self.image_color_mul = Vec4(1, 1, 1, 1)
+			self.image_color_add = Vec4(0, 0, 0, 0)
 		super().update()
 
 	@property
@@ -139,7 +138,7 @@ class BulletInstance(TemporaryInstance, CollidableInstance, DrawableInstance):
 		super().__init__(pos)
 		self.speed = 40
 		self.vel = ww.controller.mouse_pos - pos
-		self.vel.scale_to_length(self.speed)
+		self.vel = self.vel / np.linalg.norm(self.vel) * self.speed
 		self.attack = 1
 		self.body.bullet = True
 
