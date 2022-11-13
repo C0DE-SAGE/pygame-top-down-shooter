@@ -52,7 +52,7 @@ class Controller:
 
     @property
     def direction(self):
-        dir = pygame.math.Vector2(self.horizontal, self.vertical)
+        dir = pygame.Vector2(self.horizontal, self.vertical)
         if dir:
             dir.normalize_ip()
         return dir
@@ -63,4 +63,4 @@ class Controller:
 
     @property
     def mouse_pos(self):
-        return pygame.math.Vector2(pygame.mouse.get_pos()) / (ww.WINDOW_SIZE[0] / ww.SCREEN_SIZE[0]) + ww.view.rect.topleft
+        return pygame.Vector2(pygame.mouse.get_pos()) / (ww.WINDOW_SIZE[0] / ww.SCREEN_SIZE[0]) + ww.view.rect.topleft

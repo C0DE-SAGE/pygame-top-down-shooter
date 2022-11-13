@@ -54,6 +54,7 @@ class DrawableInstance(Instance):
 			return None
 		return self.normals_index[int(self.image_index)]
 
+
 class CollidableInstance(Instance):
 	def __init__(self, pos):
 		super().__init__(pos)
@@ -82,6 +83,7 @@ class CollidableInstance(Instance):
 		ww.world.DestroyBody(self.body)
 		super().kill()
 
+
 class BrightInstance(Instance):
 	def __init__(self, pos):
 		super().__init__(pos)
@@ -91,6 +93,7 @@ class BrightInstance(Instance):
 
 	def kill(self):
 		super().kill()
+
 
 class LifeInstance(CollidableInstance, DrawableInstance):
 	def __init__(self, pos):
@@ -105,6 +108,10 @@ class LifeInstance(CollidableInstance, DrawableInstance):
 		if self.render_hit:
 			self.image_color_mul = 0, 0, 0, 1
 			self.image_color_add = 1, 1, 1, 0
+			self.render_hit = False
+		else:
+			self.image_color_mul = 1, 1, 1, 1
+			self.image_color_add = 0, 0, 0, 0
 		super().update()
 
 	@property
@@ -112,6 +119,7 @@ class LifeInstance(CollidableInstance, DrawableInstance):
 		if not self.normals_index or self.render_hit:
 			return None
 		return self.normals_index[int(self.image_index)]
+
 
 class TemporaryInstance(Instance):
 	def __init__(self, pos):
@@ -124,6 +132,7 @@ class TemporaryInstance(Instance):
 		if self.t >= self.dur:
 			self.kill()
 		super().update()
+
 
 class BulletInstance(TemporaryInstance, CollidableInstance, DrawableInstance):
 	def __init__(self, pos):

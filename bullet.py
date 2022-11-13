@@ -11,7 +11,7 @@ class Bullet(BulletInstance, BrightInstance):
 		self.sprite_index = ww.sprites['bullet_idle']
 		self.attack = 2
 		self.dur = 20
-		deg = pygame.math.Vector2().angle_to(self.vel)
+		deg = pygame.Vector2().angle_to(self.vel)
 		self.image_angle = deg / 360 * 3.141592 * 2
 
 	def update(self):

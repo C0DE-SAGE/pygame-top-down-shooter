@@ -10,7 +10,7 @@ class Player(LifeInstance, BrightInstance):
 		super().__init__(pos)
 		self.sprite_index = ww.sprites['player_idle']
 		self.speed = 8
-		self.mhp = 100
+		self.mhp = 1000000
 		self.hp = self.mhp
 		self.attack_time = 0
 		self.attack_delay = 4

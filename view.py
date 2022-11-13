@@ -32,8 +32,8 @@ class View:
 		self.shader_basic = self.ctx.program(
 			vertex_shader="""
 				#version 330
-				layout (location = 0) in vec2 in_uv;
-				layout (location = 1) in vec2 in_position;
+				in vec2 in_uv;
+				in vec2 in_position;
 				out vec2 v_uv;
 				void main()
 				{
@@ -52,54 +52,6 @@ class View:
 				{
 					fragColor = texture(u_texture, v_uv);
 					fragColor = fragColor * imageColorMul + imageColorAdd;
-				}
-			"""
-		)
-		self.shader_hit = self.ctx.program(
-			vertex_shader="""
-				#version 330
-				layout (location = 0) in vec2 in_uv;
-				layout (location = 1) in vec2 in_position;
-				out vec2 v_uv;
-				void main()
-				{
-					gl_Position = vec4(in_position, 0.0, 1.0);
-					v_uv = in_uv;
-				}
-			""",
-			fragment_shader="""
-				#version 330
-				out vec4 fragColor;
-				uniform sampler2D u_texture;
-				in vec2 v_uv;
-				void main() 
-				{
-					fragColor = texture(u_texture, v_uv);
-					fragColor = vec4(1, 1, 1, fragColor.w);
-				}
-			"""
-		)
-		self.shader_default_normal = self.ctx.program(
-			vertex_shader="""
-				#version 330
-				layout (location = 0) in vec2 in_uv;
-				layout (location = 1) in vec2 in_position;
-				out vec2 v_uv;
-				void main()
-				{
-					gl_Position = vec4(in_position, 0.0, 1.0);
-					v_uv = in_uv;
-				}
-			""",
-			fragment_shader="""
-				#version 330
-				out vec4 fragColor;
-				uniform sampler2D u_texture;
-				in vec2 v_uv;
-				void main() 
-				{
-					fragColor = texture(u_texture, v_uv);
-					fragColor = vec4(0.5, 0.5, 1, fragColor.w);
 				}
 			"""
 		)
@@ -175,8 +127,6 @@ class View:
 
 		self.vbo = self.ctx.buffer(None, reserve=4 * 4 * 4)
 		self.vao_basic = self.ctx.vertex_array(self.shader_basic, [(self.vbo, "2f4 2f4", "in_position", "in_uv")], mode=moderngl.TRIANGLE_FAN)
-		self.vao_hit = self.ctx.vertex_array(self.shader_hit, [(self.vbo, "2f4 2f4", "in_position", "in_uv")], mode=moderngl.TRIANGLE_FAN)
-		self.vao_default_normal = self.ctx.vertex_array(self.shader_default_normal, [(self.vbo, "2f4 2f4", "in_position", "in_uv")], mode=moderngl.TRIANGLE_FAN)
 
 		images = []
 		for image in ww.backgrounds.values():
@@ -236,44 +186,38 @@ class View:
 		self.debug_text.clear()
 
 	def draw(self):
-		def gl_scaling(quad):
+		def rect_to_quad(rect: pygame.Rect) -> np.ndarray:
+			return np.array([rect.topleft, rect.topright, rect.bottomright, rect.bottomleft])
+
+		def gl_scaling(quad: np.ndarray) -> np.ndarray:
 			quad = (quad - self.rect.topleft) / ww.SCREEN_SIZE * 2 - 1
 			return quad
 		
-		def attach_uv(quad):
+		def attach_uv(quad: np.ndarray) -> np.ndarray:
 			uv = np.array([
 				[0, 0], [1, 0], [1, 1], [0, 1],
 			])
 			return np.hstack([quad, uv]).astype(np.float32)
 
-		def draw_texture(quad, texture, vao=self.vao_basic, image_color_mul=(1, 1, 1, 1), image_color_add=(0, 0, 0, 0)):
-			if vao is None:
-				vao = self.vao_basic
-			if isinstance(quad, pygame.rect.Rect):
-				quad = np.array([quad.topleft, quad.topright, quad.bottomright, quad.bottomleft])
+		def draw_image(image: pygame.Surface, quad: np.ndarray, image_color_mul=(1, 1, 1, 1), image_color_add=(0, 0, 0, 0)):
 			quad = gl_scaling(quad)
 			quad = attach_uv(quad)
 			self.vbo.write(quad)
 			self.shader_basic['imageColorMul'].value = image_color_mul
 			self.shader_basic['imageColorAdd'].value = image_color_add
-			texture.use()
-			vao.render()
+			self.textures[image].use()
+			self.vao_basic.render()
 
 		# Render Texture Layer
 		self.texture_layer_fbo.clear(0.5, 0.9, 0.95, 1)
 		self.texture_layer_fbo.use()
-		draw_texture(self.bg.get_rect(), self.textures[self.bg])
+		draw_image(self.bg, rect_to_quad(self.bg.get_rect()))
 		
 		for sprite in ww.group:
 			ww.group.change_layer(sprite, sprite.pos.y + isinstance(sprite, Particle) * ww.SCREEN_SIZE[1])
 		for sprite in ww.group:
 			if isinstance(sprite, DrawableInstance):
-				# if isinstance(sprite, LifeInstance) and sprite.render_hit:
-				# 	vao = self.vao_hit
-				# else:
-				# 	vao = self.vao_basic
-				vao = self.vao_basic
-				draw_texture(sprite.quad, self.textures[sprite.image], vao, sprite.image_color_mul, sprite.image_color_add)
+				draw_image(sprite.image, sprite.quad, sprite.image_color_mul, sprite.image_color_add)
 
 		# Render Pygame Layer
 		self.pg_screen.fill((0, 0, 0, 0))
@@ -305,9 +249,9 @@ class View:
 			if isinstance(sprite, DrawableInstance):
 				normal = sprite.normal
 				if normal:
-					draw_texture(sprite.quad, self.textures[normal])
+					draw_image(normal, sprite.quad)
 				else:
-					draw_texture(sprite.quad, self.textures[sprite.image], self.vao_default_normal)
+					draw_image(sprite.image, sprite.quad, image_color_mul=(0, 0, 0, 1), image_color_add=(0.5, 0.5, 1, 0))
 		
 		# Lighting
 		numLight = 0
@@ -338,11 +282,6 @@ class View:
 		self.vao_light.render()
 
 		self.pg_texture.use()
+		self.shader_basic['imageColorMul'].value = 1, 1, 1, 1
+		self.shader_basic['imageColorAdd'].value = 0, 0, 0, 0
 		self.vao_basic.render()
-
-		# Render PostProcess
-		for sprite in ww.group:
-			if isinstance(sprite, LifeInstance):
-				sprite.render_hit = False
-				sprite.image_color_mul = 1, 1, 1, 1
-				sprite.image_color_add = 0, 0, 0, 0
