@@ -152,6 +152,9 @@ class View:
 		self.normal_layer = self.ctx.texture(self.rect.size, 4)
 		self.normal_layer.filter = moderngl.NEAREST, moderngl.NEAREST
 		self.normal_layer_fbo = self.ctx.framebuffer(self.normal_layer)
+		self.ui_layer = self.ctx.texture(self.rect.size, 4)
+		self.ui_layer.filter = moderngl.NEAREST, moderngl.NEAREST
+		self.ui_layer_fbo = self.ctx.framebuffer(self.ui_layer)
 		self.vao_light = self.ctx.vertex_array(self.shader_light, [(self.vbo, "2f4 2f4", "in_position", "in_uv")], mode=moderngl.TRIANGLE_FAN)
 
 	def add_shake(self, x, y):
@@ -273,6 +276,11 @@ class View:
 		self.shader_light['numLight'].value = numLight
 		self.shader_light['flashColor'].value = 1, 1, 1, self.flash
 
+		# UI Layers
+		self.ui_layer_fbo.clear(0, 0, 0, 0)
+		self.ui_layer_fbo.use()
+		draw_image(ww.sprites['skill'][0], rect_to_quad(pygame.Rect(self.rect.bottomright, (32, 32)).move(-32, -32).move(-4, -4)))
+
 		# Integrate Layers
 		self.ctx.screen.use()
 		self.vbo.write(attach_uv(self.screen_quad))
@@ -284,4 +292,7 @@ class View:
 		self.pg_texture.use()
 		self.shader_basic['imageColorMul'].value = 1, 1, 1, 1
 		self.shader_basic['imageColorAdd'].value = 0, 0, 0, 0
+		self.vao_basic.render()
+
+		self.ui_layer.use()
 		self.vao_basic.render()
