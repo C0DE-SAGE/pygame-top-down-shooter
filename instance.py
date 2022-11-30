@@ -85,7 +85,6 @@ class CollidableInstance(Instance):
 class BrightInstance(Instance):
 	def __init__(self, pos):
 		super().__init__(pos)
-		self.light_ambient = 0
 		self.light_diffuse = 0
 		self.light_color = pygame.Vector3(1, 1, 1)
 
@@ -102,7 +101,7 @@ class LifeInstance(CollidableInstance, DrawableInstance):
 
 	def update(self):
 		if self.hp <= 0:
-			self.kill()
+			self.dead()
 		if self.render_hit:
 			self.image_color_mul = 0, 0, 0, 1
 			self.image_color_add = 1, 1, 1, 0
@@ -111,6 +110,9 @@ class LifeInstance(CollidableInstance, DrawableInstance):
 			self.image_color_mul = 1, 1, 1, 1
 			self.image_color_add = 0, 0, 0, 0
 		super().update()
+
+	def dead(self):
+		self.kill()
 
 	@property
 	def normal(self):
@@ -136,7 +138,7 @@ class BulletInstance(TemporaryInstance, CollidableInstance, DrawableInstance):
 	def __init__(self, pos):
 		super().__init__(pos)
 		self.speed = 40
-		self.vel = ww.controller.mouse_pos - pos
+		self.vel = ww.controller.mouse_pos - pos or pygame.Vector2(1, 0)
 		self.vel = self.vel / np.linalg.norm(self.vel) * self.speed
 		self.attack = 1
 		self.body.bullet = True

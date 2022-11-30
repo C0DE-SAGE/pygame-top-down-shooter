@@ -7,11 +7,21 @@ from player import Player
 from view import View
 from monster_constuctor import MonsterConstuctor
 from controller import Controller
+from title import Title, TitleButton
 
 ww.group = pygame.sprite.LayeredUpdates()
-ww.player = Player((640, 320))
-ww.group.add(ww.player)
-ww.view = View(target=ww.player)
+# ww.player = Player((640, 320))
+# ww.group.add(ww.player)
+ww.group.add(Title((320, 100)))
+def callback():
+	ww.phase = ww.PHASE.PLAY
+	ww.player = Player((320, 160))
+	ww.group.add(ww.player)
+	ww.view.target = ww.player
+ww.group.add(TitleButton((320, 200), 0, callback))
+ww.group.add(TitleButton((320, 260), 1))
+ww.group.add(TitleButton((320, 320), 2))
+ww.view = View()
 ww.monster_constructor = MonsterConstuctor()
 ww.controller = Controller()
 

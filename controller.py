@@ -8,10 +8,12 @@ class Controller:
         self._up = [pygame.K_w, pygame.K_UP]
         self._down = [pygame.K_s, pygame.K_DOWN]
         self._keys = None
+        self._prev_mouses = None
         self._mouses = None
 
     def update(self):
         self._keys = pygame.key.get_pressed()
+        self._prev_mouses = self._mouses
         self._mouses = pygame.mouse.get_pressed()
     
     @property
@@ -56,6 +58,10 @@ class Controller:
         if not dir:
             return dir
         return dir.normalize()
+
+    @property
+    def mouse_left_pressed(self):
+        return self._mouses[0] and not self._prev_mouses[0]
 
     @property
     def mouse_left_down(self):

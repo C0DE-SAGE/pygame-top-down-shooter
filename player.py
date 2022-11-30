@@ -3,30 +3,48 @@ import ww
 from bullet import Bullet
 import pygame
 from monster import *
-from monster_constuctor import MonsterConstuctor
+from item import *
 
 class Player(LifeInstance, BrightInstance):
 	def __init__(self, pos):
 		super().__init__(pos)
 		self.sprite_index = ww.sprites['player_idle']
-		self.speed = 8
-		self.mhp = 1000000
-		self.hp = self.mhp
+
+		self.stat = Status()
+		self.base_stat = Status()
+
+		# 변동된 값 #
+		self.hp = self.stat.mhp # 현재 체력
+		self.gold = 0 # 현재 골드
+		self.items_tier3 = [0 for _ in range(len(items_tier3_name))] # 획득한 아이템
+
 		self.attack_time = 0
-		self.attack_delay = 4
 		self.image_index = 0
 
-		self.light_ambient = 0.5
 		self.light_diffuse = 0.5
+
+	def apply_item(self):
+		# 아이템 능력치를 적용하여 최종능력치를 갱신 #
+		self.stat = self.base_stat
+		self.stat.atk += self.items_tier3[0]
+		self.stat.atk *= (1 + self.items_tier3[1] * 0.05)
+		self.stat.mhp *= self.items_tier3[2] * 10
+		self.stat.mhp *= (1 + self.items_tier3[3] * 0.05)
+
+		## TODO
 
 	def update(self):
 		super().update()
-		self.direction = ww.controller.direction
-		self.body.linearVelocity = self.direction * self.speed
-			
-		if ww.controller.mouse_left_down and self.attack_time == 0:
-			ww.group.add(Bullet(self.pos))
-			self.attack_time = self.attack_delay
+
+		if ww.phase == ww.PHASE.PLAY:
+			self.direction = ww.controller.direction
+			self.body.linearVelocity = self.direction * self.stat.speed
+				
+			if ww.controller.mouse_left_down and self.attack_time <= 0:
+				ww.group.add(Bullet(self.pos, self.stat))
+				self.attack_time += 1
+		else:
+			self.body.linearVelocity = (0, 0)
 		
 		if ww.controller.horizontal == 1:
 			self.image_scale.x = 1
@@ -41,7 +59,8 @@ class Player(LifeInstance, BrightInstance):
 			self.sprite_index = ww.sprites['player_idle']
 			self.image_index = 0
 			
-		self.attack_time = max(self.attack_time - 1, 0)
+		self.attack_time = max(self.attack_time - self.stat.atk_firerate / ww.FPS, 0)
+		ww.view.debug_text.append(f'골드: {ww.player.gold}')
 
 	def kill(self):
 		ww.group.add(PlayerDeath(self))
@@ -61,7 +80,6 @@ class PlayerDeath(DrawableInstance, BrightInstance):
 		self.image_speed = 0.05
 		self.image_scale = player.image_scale
 
-		self.light_ambient = 0.5
 		self.light_diffuse = 0.5
 		self.light_color = pygame.Vector3(1, 1, 1)
 	

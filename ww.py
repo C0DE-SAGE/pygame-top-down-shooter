@@ -17,14 +17,20 @@ DEBUG = True
 class PHASE(Enum):
 	TITLE = auto()
 	PLAY = auto()
+	SHOP = auto()
 	DEAD = auto()
 	CLEAR = auto()
 
-phase = PHASE.PLAY
+phase = PHASE.TITLE
+wave = 0
 
 pygame.init()
-pygame.display.set_mode(WINDOW_SIZE, flags=pygame.DOUBLEBUF | pygame.OPENGL | pygame.FULLSCREEN, vsync=1)
+pygame.display.set_mode(WINDOW_SIZE, flags=pygame.DOUBLEBUF | pygame.OPENGL | pygame.FULLSCREEN)
 # pygame.display.set_mode(WINDOW_SIZE, flags=pygame.DOUBLEBUF | pygame.OPENGL, vsync=1)
+
+font20 = pygame.font.Font("SCDream6.otf", 20)
+font15 = pygame.font.Font("SCDream6.otf", 15)
+font12 = pygame.font.Font("SCDream6.otf", 12)
 
 world = Box2D.b2World(gravity=(0, 0))
 
@@ -34,6 +40,7 @@ backgrounds = {
 
 import pathlib
 import json
+import os
 
 class Sprite:
 	def __init__(self, path: pathlib.Path):
@@ -43,9 +50,10 @@ class Sprite:
 			pygame.image.load(path).convert_alpha()
 			for path in paths
 		]
-		data = json.loads((path / 'meta.json').read_text())
-		for key, value in data.items():
-			setattr(self, key, value)
+		if os.path.isfile(path / 'meta.json'):
+			data = json.loads((path / 'meta.json').read_text())
+			for key, value in data.items():
+				setattr(self, key, value)
 		if not hasattr(self, 'l'):
 			self.l = 0
 		if not hasattr(self, 'r'):

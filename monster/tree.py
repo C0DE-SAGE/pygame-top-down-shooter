@@ -15,9 +15,15 @@ class Tree(LifeInstance):
 		self.mhp = 5
 		self.hp = self.mhp
 		self.attack = 1
+		self.gold = 5
 
 	def update(self):
-		vel = ww.player.pos - self.pos
+		if ww.phase == ww.PHASE.PLAY:
+			vel = ww.player.pos - self.pos
+		elif ww.phase == ww.PHASE.SHOP:
+			vel = -(ww.player.pos - self.pos)
+		# 	if not ww.view.rect.colliderect(self.aabb_rect):
+		# 		self.kill()
 		vel.Normalize()
 		self.body.linearVelocity = vel * self.speed
 
@@ -31,11 +37,12 @@ class Tree(LifeInstance):
 
 		super().update()
 
-	def kill(self):
+	def dead(self):
 		for _ in range(np.random.randint(15, 20)):
 			dir = np.random.uniform(0, 360)
 			spd = abs(np.random.normal(0, 6))
 			vel = pygame.Vector2(np.cos(dir) * spd, np.sin(dir) * spd)
 			ww.group.add(Particle(ww.sprites['particle'], self.pos, vel, dur=10, image_color_mul=(1, 0, 0, 1), dspd=0.8))
 			ww.view.add_shake(0.15, 0.15)
-		super().kill()
+		ww.player.gold += self.gold * ww.player.stat.gold_earn
+		super().dead()

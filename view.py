@@ -5,6 +5,9 @@ import moderngl
 import numpy as np
 from instance import BrightInstance, LifeInstance, DrawableInstance, CollidableInstance
 from particle import Particle
+from damage_number import DamageNumber
+from shop import Shop, ShopButton
+from player import Player
 
 class View:
 	MAX_NUM_LIGHT = 60
@@ -22,9 +25,10 @@ class View:
 		self.flash = 0
 		self.flash_t = View.FLASH_DURATION
 
+		self.time = 0
+
 		self.bg = ww.backgrounds['stage1']
 		self.screen_quad = np.array([[-1, 1], [1, 1], [1, -1], [-1, -1]])
-		self.font = pygame.font.SysFont("Verdana", 20)
 		self.debug_text = []
 
 		self.ctx = moderngl.create_context()
@@ -75,7 +79,6 @@ class View:
 					vec3 position;
 					vec3 color;
 				
-					vec3 ambient;
 					vec3 diffuse;
 					
 					float constant;
@@ -91,6 +94,7 @@ class View:
 				uniform Light light[%d];
 				uniform int numLight;
 				uniform vec4 flashColor;
+				uniform vec3 ambient;
 
 				vec3 CalcPointLight(Light light, vec3 normal, vec3 fragPos)
 				{
@@ -102,18 +106,17 @@ class View:
 					float attenuation = 1.0 / (light.constant + light.linear * distance + 
 								light.quadratic * (distance * distance));    
 					
-					vec3 ambient  = light.ambient  * texture(u_texture, v_uv).rgb;
-					vec3 diffuse  = light.diffuse  * diff * texture(u_texture, v_uv).rgb;
-					ambient  *= attenuation;
-					diffuse  *= attenuation;
-					return (ambient + diffuse) * light.color;
+					vec3 diffuse = light.diffuse  * diff * texture(u_texture, v_uv).rgb;
+					diffuse *= attenuation;
+					return diffuse * light.color;
 				}
 
-				void main() 
+				void main()
 				{
 					vec3 norm = normalize(texture(u_normal, v_uv).xyz - vec3(0.5, 0.5, 0.5));
 					norm.x = -norm.x;
 					vec3 result = vec3(0, 0, 0);
+					result += ambient * texture(u_texture, v_uv).rgb;
 					for(int i = 0; i < numLight; i++)
 						result += CalcPointLight(light[i], norm, vec3(fragPos.xy, 0.0));
 					result = result * (1 - flashColor.a) + flashColor.rgb * flashColor.a;
@@ -182,9 +185,18 @@ class View:
 		else:
 			self.flash = 0
 
+		if ww.phase == ww.PHASE.PLAY:
+			self.time += 1
+		if self.time >= 100:
+			ww.phase = ww.PHASE.SHOP
+			ww.group.add(Shop(self.rect.center))
+
+			self.time = 0
+		self.debug_text.append(self.time)
+
 	def draw_debug_text(self):
 		for idx, text in enumerate(self.debug_text):
-			text = self.font.render(str(text), True, (0, 0, 0))
+			text = ww.font20.render(str(text), False, (0, 0, 0))
 			self.pg_screen.blit(text, (10, 10 + idx * 20))
 		self.debug_text.clear()
 
@@ -225,7 +237,7 @@ class View:
 		# Render Pygame Layer
 		self.pg_screen.fill((0, 0, 0, 0))
 		for sprite in ww.group:
-			if isinstance(sprite, LifeInstance):
+			if isinstance(sprite, LifeInstance) and not isinstance(sprite, Player):
 				hp_rect = sprite.aabb_rect.move(-self.rect.left, -self.rect.top)
 				hp_rect = hp_rect.move(0, hp_rect.height + 2)
 				hp_rect.height = 4
@@ -234,6 +246,11 @@ class View:
 				hp_rect = hp_rect.inflate(-2, -2)
 				hp_rect.width *= sprite.hp / sprite.mhp
 				pygame.draw.rect(self.pg_screen, (255, 0, 0), hp_rect, 0, 5)
+			if isinstance(sprite, DamageNumber):
+				text = ww.font12.render(str(round(sprite.num)), False, (0, 0, 0))
+				self.pg_screen.blit(text, sprite.pos - (self.rect.left, self.rect.top))
+			if hasattr(sprite, 'draw'):
+				sprite.draw(self.pg_screen)
 
 		if ww.DEBUG:
 			for sprite in ww.group:
@@ -264,7 +281,6 @@ class View:
 			pos = gl_scaling(np.array(sprite.pos))
 			self.shader_light[f'light[{numLight}].position'].value = pos[0], -pos[1], 0.1
 			self.shader_light[f'light[{numLight}].color'].value = sprite.light_color
-			self.shader_light[f'light[{numLight}].ambient'].value = sprite.light_ambient, sprite.light_ambient, sprite.light_ambient
 			self.shader_light[f'light[{numLight}].diffuse'].value = sprite.light_diffuse, sprite.light_diffuse, sprite.light_diffuse
 			self.shader_light[f'light[{numLight}].constant'].value = 1.0
 			self.shader_light[f'light[{numLight}].linear'].value = 0.09
@@ -275,6 +291,7 @@ class View:
 				break
 		self.shader_light['numLight'].value = numLight
 		self.shader_light['flashColor'].value = 1, 1, 1, self.flash
+		self.shader_light['ambient'].value = 0.3, 0.3, 0.3
 
 		# UI Layers
 		self.ui_layer_fbo.clear(0, 0, 0, 0)
