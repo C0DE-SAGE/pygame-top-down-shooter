@@ -15,7 +15,7 @@ class Player(LifeInstance, BrightInstance):
 
 		# 변동된 값 #
 		self.hp = self.stat.mhp # 현재 체력
-		self.gold = 0 # 현재 골드
+		self.gold = 100000 # 현재 골드
 		self.items_tier3 = [0 for _ in range(len(items_tier3_name))] # 획득한 아이템
 
 		self.attack_time = 0
@@ -25,13 +25,30 @@ class Player(LifeInstance, BrightInstance):
 
 	def apply_item(self):
 		# 아이템 능력치를 적용하여 최종능력치를 갱신 #
-		self.stat = self.base_stat
+		self.stat.atk = self.base_stat.atk
+		self.stat.atk_firerate = self.base_stat.atk_firerate
+		self.stat.speed = self.base_stat.speed
+		self.stat.mhp = self.base_stat.mhp
+		self.stat.atk_velocity= self.base_stat.atk_velocity
+		self.stat.atk_duration= self.base_stat.atk_duration
+		self.stat.crit = self.base_stat.crit
+		self.stat.crit_atk = self.base_stat.crit_atk
+		self.stat.gold_earn = self.base_stat.gold_earn
+
 		self.stat.atk += self.items_tier3[0]
 		self.stat.atk *= (1 + self.items_tier3[1] * 0.05)
-		self.stat.mhp *= self.items_tier3[2] * 10
+		self.stat.mhp += self.items_tier3[2] * 10
 		self.stat.mhp *= (1 + self.items_tier3[3] * 0.05)
-
-		## TODO
+		self.stat.atk_firerate *= (1 + self.items_tier3[4] * 0.1)
+		self.stat.atk_velocity *= (1 + self.items_tier3[5] * 0.1)
+		self.stat.atk_duration *= (1 + self.items_tier3[6] * 0.1)
+		self.stat.atk_velocity *= (1 + self.items_tier3[8] * -0.15)
+		self.stat.atk *= (1 + self.items_tier3[8] * 0.1)
+		self.stat.atk_velocity *= (1 + self.items_tier3[10] * 0.06)
+		self.stat.atk *= (1 + self.items_tier3[10] * 0.03)
+		self.stat.crit *= (1 + self.items_tier3[11] * 0.08)
+		self.stat.crit_atk *= (1 + self.items_tier3[12] * 0.05)
+		self.stat.speed *= (1 + self.items_tier3[13] * 0.1)
 
 	def update(self):
 		super().update()

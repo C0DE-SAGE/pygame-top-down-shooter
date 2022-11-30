@@ -22,8 +22,8 @@ class Tree(LifeInstance):
 			vel = ww.player.pos - self.pos
 		elif ww.phase == ww.PHASE.SHOP:
 			vel = -(ww.player.pos - self.pos)
-		# 	if not ww.view.rect.colliderect(self.aabb_rect):
-		# 		self.kill()
+			if not ww.view.rect.colliderect(self.aabb_rect):
+				self.kill()
 		vel.Normalize()
 		self.body.linearVelocity = vel * self.speed
 

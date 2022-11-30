@@ -16,7 +16,8 @@ class Shop(Instance):
         ww.group.add(item_button)
 
         def draw(self, surface):
-            text = ww.font20.render(f'골드 {ww.player.gold}', False, (0, 0, 0))
+            surface.blit(ww.sprites['icons'][0], ww.sprites['icons'][0].get_rect(center=self.pos))
+            text = ww.font20.render(f'     {ww.player.gold}', False, (0, 0, 0))
             text_rect = text.get_rect(center=self.rect.center)
             surface.blit(text, text_rect)
         item_button = ShopButton(pygame.Rect(100, 320, 80, 30), None, draw)
@@ -61,15 +62,15 @@ class Shop(Instance):
             text_rect = text.get_rect(topleft=pygame.Vector2(self.rect.topleft) + (10, 10))
             surface.blit(text, text_rect)
             text = [
-                f'공격력: {round(ww.player.stat.atk, 2)}',
-                f'공격속도: {ww.player.stat.atk_firerate}',
-                f'이동속도: {ww.player.stat.speed}',
-                f'최대체력: {ww.player.stat.mhp}',
-                f'투사체 속도: {ww.player.stat.atk_velocity}',
-                f'투사체 체공시간: {ww.player.stat.atk_duration}',
-                f'치명타 계수: {ww.player.stat.crit}',
-                f'치명타 확률: {ww.player.stat.crit_atk}',
-                f'골드 획득 계수: {ww.player.stat.gold_earn}',
+                f'공격력: {ww.player.stat.atk:.2f}',
+                f'공격속도: {ww.player.stat.atk_firerate:.2f}',
+                f'이동속도: {ww.player.stat.speed:.2f}',
+                f'최대체력: {ww.player.stat.mhp:.2f}',
+                f'투사체 속도: {ww.player.stat.atk_velocity:.2f}',
+                f'투사체 체공시간: {ww.player.stat.atk_duration:.2f}',
+                f'치명타 계수: {ww.player.stat.crit:.2f}',
+                f'치명타 확률: {ww.player.stat.crit_atk:.2f}',
+                f'골드 획득 계수: {ww.player.stat.gold_earn:.2f}',
             ]
             for i, t in enumerate(text):
                 t = ww.font12.render(t, False, (0, 0, 0))
@@ -143,10 +144,9 @@ class Shop(Instance):
                         ww.player.apply_item()
                 return callback
             
-            item_button = ShopButton(pygame.Rect(10 + (410 / 4 + 10) * i, 280, 410 / 4, 30), make_callback(item_button, cost, i), make_draw(cost))
+            item_button = ShopButton(pygame.Rect(10 + (410 / 4 + 10) * i, 280, 410 / 4, 30), make_callback(item_button, cost, random_numbers[i]), make_draw(cost))
             self.phase_button[0].append(item_button)
             
-
         self.phase_set(0)
 
     def phase_set(self, phase):
@@ -156,8 +156,6 @@ class Shop(Instance):
                 sprite.kill()
         for sprite in self.phase_button[phase]:
             ww.group.add(sprite)
-
-
 
 
 class ShopButton(Instance):
