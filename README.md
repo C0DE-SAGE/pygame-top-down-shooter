@@ -8,6 +8,7 @@ Sejong Univ. seminar project with pygame
       </tr>
 </table>
 
-## run game in python   
+## Run game in python   
+<br>
 ### 1. pip install -r requirements.txt   
 ### 2. python main.py
