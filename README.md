@@ -9,6 +9,5 @@ Sejong Univ. seminar project with pygame
 </table>
 
 ## Run game in python   
-            <br></br>
 ### 1. pip install -r requirements.txt   
 ### 2. python main.py
