@@ -45,5 +45,6 @@ class Tree(LifeInstance):
 			ww.group.add(Particle(ww.sprites['particle'], self.pos, vel, dur=10, image_color_mul=(1, 0, 0, 1), dspd=0.8))
 			ww.view.add_shake(0.07, 0.07)
 		ww.player.gold += self.gold * ww.player.stat.gold_earn
+		ww.player.hp = min(ww.player.hp + ww.player.items_tier3[9], ww.player.stat.mhp)
 		pygame.mixer.find_channel(True).play(ww.sounds['dead'])
 		super().dead()

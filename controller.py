@@ -7,6 +7,7 @@ class Controller:
         self._right = [pygame.K_d, pygame.K_RIGHT]
         self._up = [pygame.K_w, pygame.K_UP]
         self._down = [pygame.K_s, pygame.K_DOWN]
+        self._shift = [pygame.K_LSHIFT, pygame.K_RSHIFT]
         self._keys = None
         self._prev_mouses = None
         self._mouses = None
@@ -40,6 +41,13 @@ class Controller:
     @property
     def down(self):
         for k in self._down:
+            if self._keys[k]:
+                return True
+        return False
+    
+    @property
+    def shift(self):
+        for k in self._shift:
             if self._keys[k]:
                 return True
         return False

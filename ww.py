@@ -12,7 +12,7 @@ WINDOW_SIZE = pygame.Vector2(1920, 1080)
 SCREEN_SIZE = pygame.Vector2(640, 360)
 FPS = 60
 PPM = 20
-DEBUG = True
+DEBUG = False
 
 class PHASE(Enum):
 	TITLE = auto()
@@ -87,9 +87,10 @@ sounds = {
 	for sound_path in pathlib.Path('sounds').glob('*.wav')
 }
 for sound in sounds.values():
-	sound.set_volume(0.3)
+	sound.set_volume(0.1)
+pygame.mixer.set_num_channels(60)
 pygame.mixer.music.load('sounds/bgm.mp3')
-pygame.mixer.music.play()
+pygame.mixer.music.play(-1)
 
 def _get_ellipsis_vertices(sprite):
 	precision = 8

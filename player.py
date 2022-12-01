@@ -4,6 +4,8 @@ from m1Attack import M1Attack, M2Attack
 import pygame
 from monster import *
 from item import *
+from particle import Particle2
+import numpy as np
 
 class Player(LifeInstance, BrightInstance):
 	def __init__(self, pos):
@@ -19,7 +21,9 @@ class Player(LifeInstance, BrightInstance):
 		self.skill_point = 0 # 현재 골드
 		self.items_tier3 = [0 for _ in range(len(items_tier3_name))] # 획득한 아이템
 
-		self.attack_time = 0
+		self.m1Attack_time = 0
+		self.m2Attack_time = 0
+		self.shift_time = 0
 		self.image_index = 0
 
 		self.light_diffuse = 0.5
@@ -43,6 +47,8 @@ class Player(LifeInstance, BrightInstance):
 		self.stat.atk_firerate *= (1 + self.items_tier3[4] * 0.1)
 		self.stat.atk_velocity *= (1 + self.items_tier3[5] * 0.1)
 		self.stat.atk_duration *= (1 + self.items_tier3[6] * 0.1)
+		self.stat.atk_duration *= (1 + self.items_tier3[7] * -0.15)
+		self.stat.atk_firerate *= (1 + self.items_tier3[7] * 0.15)
 		self.stat.atk_velocity *= (1 + self.items_tier3[8] * -0.15)
 		self.stat.atk *= (1 + self.items_tier3[8] * 0.1)
 		self.stat.atk_velocity *= (1 + self.items_tier3[10] * 0.06)
@@ -58,12 +64,18 @@ class Player(LifeInstance, BrightInstance):
 			self.direction = ww.controller.direction
 			self.body.linearVelocity = self.direction * self.stat.speed
 				
-			if ww.controller.mouse_left_down and self.attack_time <= 0:
+			if ww.controller.mouse_left_down and self.m1Attack_time <= 0:
 				ww.group.add(M1Attack(self.pos - (0, 12), self.stat))
-				self.attack_time += 1
-			if ww.controller.mouse_right_pressed and self.attack_time <= 0:
+				self.m1Attack_time += 1
+			if ww.controller.mouse_right_pressed and self.m2Attack_time <= 0:
 				ww.group.add(M2Attack(ww.controller.mouse_pos, self.stat))
-				self.attack_time += 1
+				self.m2Attack_time += 1
+			if ww.controller.shift and self.shift_time <= 0:
+				ww.group.add(Particle2(ww.sprites['skill_effect_shift'], pos=self.pos + (0, -10), dur=30, image_scale=(2,2)))
+				dist = ww.controller.mouse_pos - self.pos or pygame.Vector2(1, 0)
+				dist = dist / np.linalg.norm(dist) * 5
+				self.body.position += dist
+				self.shift_time += 1
 		else:
 			self.body.linearVelocity = (0, 0)
 		
@@ -80,7 +92,9 @@ class Player(LifeInstance, BrightInstance):
 			self.sprite_index = ww.sprites['player_idle']
 			self.image_index = 0
 			
-		self.attack_time = max(self.attack_time - self.stat.atk_firerate / ww.FPS, 0)
+		self.m1Attack_time = max(self.m1Attack_time - self.stat.atk_firerate / ww.FPS, 0)
+		self.m2Attack_time = max(self.m2Attack_time - self.stat.atk_firerate / 30 / ww.FPS, 0)
+		self.shift_time = max(self.shift_time - self.stat.atk_firerate / 30 / ww.FPS, 0)
 
 	def kill(self):
 		ww.group.add(PlayerDeath(self))

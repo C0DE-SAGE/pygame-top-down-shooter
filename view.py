@@ -148,6 +148,9 @@ class View:
 		self.pg_screen = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
 		self.pg_texture = self.ctx.texture(self.rect.size, 4)
 		self.pg_texture.filter = moderngl.NEAREST, moderngl.NEAREST
+		self.pg_post_screen = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+		self.pg_post_texture = self.ctx.texture(self.rect.size, 4)
+		self.pg_post_texture.filter = moderngl.NEAREST, moderngl.NEAREST
 
 		self.texture_layer = self.ctx.texture(self.rect.size, 4)
 		self.texture_layer.filter = moderngl.NEAREST, moderngl.NEAREST
@@ -187,7 +190,7 @@ class View:
 
 		if ww.phase == ww.PHASE.PLAY:
 			self.time += 1
-		if self.time >= 60 * 60:
+		if self.time >= 60:
 			ww.phase = ww.PHASE.SHOP
 			ww.group.add(Shop(self.rect.center))
 
@@ -257,7 +260,7 @@ class View:
 			if hasattr(sprite, 'draw'):
 				sprite.draw(self.pg_screen)
 		if ww.phase == ww.PHASE.PLAY:
-			text = ww.font12.render('웨이브', False, (255, 255, 255))
+			text = ww.font12.render('밤', False, (255, 255, 255))
 			self.pg_screen.blit(text, text.get_rect(midtop=(ww.SCREEN_SIZE[0] / 2, 0)))
 			text = ww.font20.render(f'{ww.wave}', False, (255, 255, 255))
 			self.pg_screen.blit(text, text.get_rect(midtop=(ww.SCREEN_SIZE[0] / 2, 16)))
@@ -307,14 +310,34 @@ class View:
 		self.ui_layer_fbo.clear(0, 0, 0, 0)
 		self.ui_layer_fbo.use()
 		if ww.phase == ww.PHASE.PLAY:
-			for i in range(4):
-				draw_image(ww.sprites['skill'][i], rect_to_quad(pygame.Rect(self.rect.bottomright, (32, 32)).move(-32 * (i + 1), -32).move(-4, -4)))
+			cooltime = [ww.player.m1Attack_time, ww.player.m2Attack_time, ww.player.shift_time, 1]
+			for i in range(3):
+				rect = pygame.Rect(self.rect.bottomright, (32, 32)).move(-32 * (3 - i), -32).move(-4, -4)
+				draw_image(ww.sprites['skill'][i], rect_to_quad(rect))
+				rect = pygame.Rect(pygame.Vector2(self.rect.bottomright), (32, 32)).move(-32 * (3 - i), -32).move(-4, -4)
+				quad = rect_to_quad(rect)
+				quad[0][1] = quad[1][1] = quad[1][1] + 32 * (1 - cooltime[i])
+				draw_image(ww.sprites['primitive'][0], quad, image_color_mul=(1, 1, 1, .5 + .5 * (1 - cooltime[i])))
 			quad = pygame.Rect((0, 0), (192, 24)).move(0, ww.SCREEN_SIZE[1] - 24).move(self.rect.topleft).move(4, -4)
 			quad = rect_to_quad(quad)
 			draw_image(ww.sprites['primitive'][0], quad)
 			quad = pygame.Rect((0, 0), (192 * ww.player.hp / ww.player.stat.mhp, 24)).move(0, ww.SCREEN_SIZE[1] - 24).move(self.rect.topleft).move(4, -4)
 			quad = rect_to_quad(quad)
 			draw_image(ww.sprites['primitive'][0], quad, image_color_mul=(0.56, 0.84, 0.47, 1))
+
+		self.pg_post_screen.fill((0, 0, 0, 0))
+		if ww.phase == ww.PHASE.PLAY:
+			text = ww.font12.render(f'{ww.player.hp} / {ww.player.stat.mhp}', False, (0, 0, 0))
+			quad = pygame.Rect((0, 0), (192, 24)).move(0, ww.SCREEN_SIZE[1] - 24).move(4, -4)
+			self.pg_post_screen.blit(text, text.get_rect(center=quad.center))
+			text_string = ['M1', 'M2', 'Shift', 'R']
+			for i in range(3):
+				text = ww.font12.render(text_string[i], False, (255, 255, 255))
+				rect = pygame.Rect(pygame.Vector2(self.rect.bottomright), (32, 32)).move(-32 * (3 - i), -32).move(-4, -4).move(-self.rect.left, -self.rect.top).move(0, -20)
+				self.pg_post_screen.blit(text, text.get_rect(center=rect.center))
+
+		self.pg_post_texture.write(self.pg_post_screen.get_view('1'))
+		self.pg_post_texture.swizzle = 'BGRA'
 
 		# Integrate Layers
 		self.ctx.screen.use()
@@ -330,4 +353,9 @@ class View:
 		self.vao_basic.render()
 
 		self.ui_layer.use()
+		self.vao_basic.render()
+
+		self.pg_post_texture.use()
+		self.shader_basic['imageColorMul'].value = 1, 1, 1, 1
+		self.shader_basic['imageColorAdd'].value = 0, 0, 0, 0
 		self.vao_basic.render()

@@ -9,7 +9,7 @@ class Shop(Instance):
         super().__init__(pos)
 
         def draw(self, surface):
-            text = ww.font20.render(f'웨이브 {ww.wave}', False, (0, 0, 0))
+            text = ww.font20.render(f'{ww.wave}일 째', False, (0, 0, 0))
             text_rect = text.get_rect(center=self.rect.center)
             surface.blit(text, text_rect)
         item_button = ShopButton(pygame.Rect(10, 320, 90, 30), None, draw)
@@ -83,7 +83,7 @@ class Shop(Instance):
         ww.group.add(item_button)
 
         def draw(self, surface):
-            text = ww.font20.render(f'다음 웨이브', False, (0, 0, 0))
+            text = ww.font20.render(f'다음으로', False, (0, 0, 0))
             text_rect = text.get_rect(center=self.rect.center)
             surface.blit(text, text_rect)
         def callback(s):
