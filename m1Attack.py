@@ -71,7 +71,7 @@ class M2Attack(CollidableInstance, DrawableInstance, BrightInstance):
 				if ww.player.items_tier3[14] and (ww.player.pos - self.pos).length < 100:
 					damage *= (1 + ww.player.items_tier3[14] * 0.2)
 				damage = damage * self.atk_multiplier
-				damage *= (ww.player.skill_level[1] + 1) // 2 * 0.2
+				damage *= 1 + (ww.player.skill_level[1] + 1) // 2 * 0.2
 				if crit:
 					damage *= ww.player.stat.crit_atk
 				ce.other.userData.hp -= damage
