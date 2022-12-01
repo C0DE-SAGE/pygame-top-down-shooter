@@ -4,7 +4,7 @@ import math
 from pygame.locals import *
 from monster import *
 from player import Player
-from bullet import Bullet
+from m1Attack import M1Attack, M2Attack
 from enum import IntEnum, Enum, auto
 
 WINDOW_SIZE = pygame.Vector2(1920, 1080)
@@ -22,7 +22,7 @@ class PHASE(Enum):
 	CLEAR = auto()
 
 phase = PHASE.TITLE
-wave = 0
+wave = 1
 
 pygame.init()
 pygame.display.set_mode(WINDOW_SIZE, flags=pygame.DOUBLEBUF | pygame.OPENGL | pygame.FULLSCREEN)
@@ -82,6 +82,15 @@ sprites = {
     for sprite_path in pathlib.Path('assets').glob('*')
 }
 
+sounds = {
+	sound_path.stem : pygame.mixer.Sound(sound_path)
+	for sound_path in pathlib.Path('sounds').glob('*.wav')
+}
+for sound in sounds.values():
+	sound.set_volume(0.3)
+pygame.mixer.music.load('sounds/bgm.mp3')
+pygame.mixer.music.play()
+
 def _get_ellipsis_vertices(sprite):
 	precision = 8
 	vertices = []
@@ -100,7 +109,8 @@ class CategoryBits(IntEnum):
 basic_sprite = {
 	Player: sprites['player_idle'],
 	Tree: sprites['tree_idle'],
-	Bullet: sprites['bullet_idle'],
+	M1Attack: sprites['skill_effect_m1'],
+	M2Attack: sprites['skill_effect_m2'],
 }
 
 fixture_defs = {
@@ -112,8 +122,12 @@ fixture_defs = {
 		density=0.1, categoryBits=CategoryBits.MONSTER, maskBits=CategoryBits.PLAYER | CategoryBits.MONSTER | CategoryBits.BULLET,
 		shape=Box2D.b2PolygonShape(vertices=_get_ellipsis_vertices(basic_sprite[Tree])),
 	),
-	Bullet: Box2D.b2FixtureDef(
+	M1Attack: Box2D.b2FixtureDef(
 		density=0.1, categoryBits=CategoryBits.BULLET, maskBits=CategoryBits.MONSTER,
-		shape=Box2D.b2PolygonShape(vertices=_get_ellipsis_vertices(basic_sprite[Bullet])),
+		shape=Box2D.b2PolygonShape(vertices=_get_ellipsis_vertices(basic_sprite[M1Attack])),
+	),
+	M2Attack: Box2D.b2FixtureDef(
+		density=0.1, categoryBits=CategoryBits.BULLET, maskBits=CategoryBits.MONSTER,
+		shape=Box2D.b2PolygonShape(vertices=_get_ellipsis_vertices(basic_sprite[M2Attack])),
 	),
 }

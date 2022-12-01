@@ -4,7 +4,6 @@ from Box2D import *
 import numpy as np
 from particle import Particle
 import pygame
-# from player import Player
 
 class Tree(LifeInstance):
 	def __init__(self, pos):
@@ -20,10 +19,11 @@ class Tree(LifeInstance):
 	def update(self):
 		if ww.phase == ww.PHASE.PLAY:
 			vel = ww.player.pos - self.pos
-		elif ww.phase == ww.PHASE.SHOP:
+		elif ww.phase == ww.PHASE.SHOP or ww.phase == ww.PHASE.DEAD:
 			vel = -(ww.player.pos - self.pos)
 			if not ww.view.rect.colliderect(self.aabb_rect):
 				self.kill()
+				return
 		vel.Normalize()
 		self.body.linearVelocity = vel * self.speed
 
@@ -43,6 +43,7 @@ class Tree(LifeInstance):
 			spd = abs(np.random.normal(0, 6))
 			vel = pygame.Vector2(np.cos(dir) * spd, np.sin(dir) * spd)
 			ww.group.add(Particle(ww.sprites['particle'], self.pos, vel, dur=10, image_color_mul=(1, 0, 0, 1), dspd=0.8))
-			ww.view.add_shake(0.15, 0.15)
+			ww.view.add_shake(0.07, 0.07)
 		ww.player.gold += self.gold * ww.player.stat.gold_earn
+		pygame.mixer.find_channel(True).play(ww.sounds['dead'])
 		super().dead()

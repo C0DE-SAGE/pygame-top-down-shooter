@@ -187,7 +187,7 @@ class View:
 
 		if ww.phase == ww.PHASE.PLAY:
 			self.time += 1
-		if self.time >= 100:
+		if self.time >= 60 * 60:
 			ww.phase = ww.PHASE.SHOP
 			ww.group.add(Shop(self.rect.center))
 
@@ -226,7 +226,12 @@ class View:
 		# Render Texture Layer
 		self.texture_layer_fbo.clear(0.5, 0.9, 0.95, 1)
 		self.texture_layer_fbo.use()
-		draw_image(self.bg, rect_to_quad(self.bg.get_rect()))
+		bg_pos = pygame.Vector2(self.rect.topleft)
+		bg_pos.x = bg_pos.x // self.bg.get_width() * self.bg.get_width()
+		bg_pos.y = bg_pos.y // self.bg.get_height() * self.bg.get_height()
+		for i in range(3):
+			for j in range(3):
+				draw_image(self.bg, rect_to_quad(self.bg.get_rect(topleft=bg_pos + (self.bg.get_width() * i, self.bg.get_height() * j))))
 		
 		for sprite in ww.group:
 			ww.group.change_layer(sprite, sprite.pos.y + isinstance(sprite, Particle) * ww.SCREEN_SIZE.y)
@@ -251,6 +256,11 @@ class View:
 				self.pg_screen.blit(text, sprite.pos - (self.rect.left, self.rect.top))
 			if hasattr(sprite, 'draw'):
 				sprite.draw(self.pg_screen)
+		if ww.phase == ww.PHASE.PLAY:
+			text = ww.font12.render('웨이브', False, (255, 255, 255))
+			self.pg_screen.blit(text, text.get_rect(midtop=(ww.SCREEN_SIZE[0] / 2, 0)))
+			text = ww.font20.render(f'{ww.wave}', False, (255, 255, 255))
+			self.pg_screen.blit(text, text.get_rect(midtop=(ww.SCREEN_SIZE[0] / 2, 16)))
 
 		if ww.DEBUG:
 			for sprite in ww.group:
@@ -296,7 +306,15 @@ class View:
 		# UI Layers
 		self.ui_layer_fbo.clear(0, 0, 0, 0)
 		self.ui_layer_fbo.use()
-		draw_image(ww.sprites['skill'][0], rect_to_quad(pygame.Rect(self.rect.bottomright, (32, 32)).move(-32, -32).move(-4, -4)))
+		if ww.phase == ww.PHASE.PLAY:
+			for i in range(4):
+				draw_image(ww.sprites['skill'][i], rect_to_quad(pygame.Rect(self.rect.bottomright, (32, 32)).move(-32 * (i + 1), -32).move(-4, -4)))
+			quad = pygame.Rect((0, 0), (192, 24)).move(0, ww.SCREEN_SIZE[1] - 24).move(self.rect.topleft).move(4, -4)
+			quad = rect_to_quad(quad)
+			draw_image(ww.sprites['primitive'][0], quad)
+			quad = pygame.Rect((0, 0), (192 * ww.player.hp / ww.player.stat.mhp, 24)).move(0, ww.SCREEN_SIZE[1] - 24).move(self.rect.topleft).move(4, -4)
+			quad = rect_to_quad(quad)
+			draw_image(ww.sprites['primitive'][0], quad, image_color_mul=(0.56, 0.84, 0.47, 1))
 
 		# Integrate Layers
 		self.ctx.screen.use()

@@ -12,22 +12,23 @@ class Shop(Instance):
             text = ww.font20.render(f'웨이브 {ww.wave}', False, (0, 0, 0))
             text_rect = text.get_rect(center=self.rect.center)
             surface.blit(text, text_rect)
-        item_button = ShopButton(pygame.Rect(10, 320, 80, 30), None, draw)
+        item_button = ShopButton(pygame.Rect(10, 320, 90, 30), None, draw)
         ww.group.add(item_button)
 
         def draw(self, surface):
-            surface.blit(ww.sprites['icons'][0], ww.sprites['icons'][0].get_rect(center=self.pos))
-            text = ww.font20.render(f'     {ww.player.gold}', False, (0, 0, 0))
-            text_rect = text.get_rect(center=self.rect.center)
+            surface.blit(ww.sprites['icons'][0], ww.sprites['icons'][0].get_rect(midleft=pygame.Vector2(self.rect.midleft) + (5, 0)))
+            text = ww.font20.render(f'{int(ww.player.gold):d}', False, (0, 0, 0))
+            text_rect = text.get_rect(midright=pygame.Vector2(self.rect.midright) - (5, 0))
             surface.blit(text, text_rect)
-        item_button = ShopButton(pygame.Rect(100, 320, 80, 30), None, draw)
+        item_button = ShopButton(pygame.Rect(110, 320, 100, 30), None, draw)
         ww.group.add(item_button)
 
         def draw(self, surface):
-            text = ww.font20.render(f'스킬포인트 {30}', False, (0, 0, 0))
-            text_rect = text.get_rect(center=self.rect.center)
+            surface.blit(ww.sprites['icons'][1], ww.sprites['icons'][1].get_rect(midleft=pygame.Vector2(self.rect.midleft) + (5, 0)))
+            text = ww.font20.render(f'{ww.player.skill_point}', False, (0, 0, 0))
+            text_rect = text.get_rect(midright=pygame.Vector2(self.rect.midright) - (5, 0))
             surface.blit(text, text_rect)
-        item_button = ShopButton(pygame.Rect(190, 320, 80, 30), None, draw)
+        item_button = ShopButton(pygame.Rect(220, 320, 100, 30), None, draw)
         ww.group.add(item_button)
 
         def draw(self, surface):
@@ -88,6 +89,7 @@ class Shop(Instance):
         def callback(s):
             ww.phase = ww.PHASE.PLAY
             ww.wave += 1
+            ww.player.skill_point += 1
         item_button = ShopButton(pygame.Rect(460, 320, 170, 30), callback, draw)
         ww.group.add(item_button)
 
@@ -169,6 +171,7 @@ class ShopButton(Instance):
         if ww.controller.mouse_left_pressed:
             if self.rect.move(ww.view.rect.topleft).collidepoint(ww.controller.mouse_pos):
                 if self.callback:
+                    pygame.mixer.find_channel(True).play(ww.sounds['text'])
                     self.callback(self)
         if ww.phase != ww.PHASE.SHOP:
             self.kill()

@@ -68,5 +68,13 @@ class Controller:
         return self._mouses[0]
 
     @property
+    def mouse_right_pressed(self):
+        return self._mouses[2] and not self._prev_mouses[2]
+
+    @property
+    def mouse_right_down(self):
+        return self._mouses[2]
+
+    @property
     def mouse_pos(self):
         return pygame.Vector2(pygame.mouse.get_pos()) / (ww.WINDOW_SIZE.x / ww.SCREEN_SIZE.x) + ww.view.rect.topleft

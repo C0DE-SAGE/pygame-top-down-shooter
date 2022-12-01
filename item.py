@@ -6,7 +6,7 @@ class Status:
 	atk = 5
 	atk_firerate = 12
 	speed = 8
-	mhp = 100000
+	mhp = 100
 	atk_velocity = 40
 	atk_duration = 20
 	crit = 0.25
@@ -74,7 +74,3 @@ class ItemTier3(Item):
 
 	def rect(self, **kwargs):
 		return ww.sprites['items_tier3'][0].get_rect(**kwargs)
-
-	def apply(eslf, stat: Status):
-		stat.dur -= 4
-		stat.atk += 3
