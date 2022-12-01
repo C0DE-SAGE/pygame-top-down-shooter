@@ -69,8 +69,8 @@ class Shop(Instance):
                 f'최대체력: {ww.player.stat.mhp:.2f}',
                 f'투사체 속도: {ww.player.stat.atk_velocity:.2f}',
                 f'투사체 체공시간: {ww.player.stat.atk_duration:.2f}',
-                f'치명타 계수: {ww.player.stat.crit:.2f}',
-                f'치명타 확률: {ww.player.stat.crit_atk:.2f}',
+                f'치명타 계수: {ww.player.stat.crit_atk:.2f}',
+                f'치명타 확률: {ww.player.stat.crit:.2f}',
                 f'골드 획득 계수: {ww.player.stat.gold_earn:.2f}',
             ]
             for i, t in enumerate(text):

@@ -9,7 +9,7 @@ class Status:
     mhp = 100
     atk_velocity = 40
     atk_duration = 20
-    crit = 0.0
+    crit = 0.05
     crit_atk = 1.5
     gold_earn = 1.0
 
