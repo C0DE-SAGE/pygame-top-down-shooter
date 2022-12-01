@@ -104,6 +104,11 @@ class Shop(Instance):
         for i in range(3):
             def make_draw(i):
                 def draw(self, surface):
+                    skill_info = [
+                        [f'추가공격력+{ww.player.skill_level[0] * 5}%'],
+                        [f'추가공격력+{(ww.player.skill_level[1] + 1) // 2 * 20}%', f'쿨타임-{(ww.player.skill_level[1]) // 2 * 0.5}'],
+                        [f'쿨타임-{ww.player.skill_level[2] * 0.7}']
+                    ]
                     text = ww.font20.render(f'{skill_name[i]}', False, (0, 0, 0))
                     text_rect = text.get_rect(center=pygame.Vector2(self.rect.center) - (0, 90))
                     surface.blit(text, text_rect)
@@ -113,10 +118,10 @@ class Shop(Instance):
                     text = ww.font15.render(f'효과', False, (0, 0, 0))
                     text_rect = text.get_rect(center=pygame.Vector2(self.rect.center) - (0, 30))
                     surface.blit(text, text_rect)
-                    # for j, info in enumerate(items[i].info):
-                    #     text = ww.font15.render(f'{info}', False, (0, 0, 0))
-                    #     text_rect = text.get_rect(center=pygame.Vector2(self.rect.center) - (0, 0 - 15 * j))
-                    #     surface.blit(text, text_rect)
+                    for j, info in enumerate(skill_info[i]):
+                        text = ww.font15.render(f'{info}', False, (0, 0, 0))
+                        text_rect = text.get_rect(center=pygame.Vector2(self.rect.center) - (0, 0 - 15 * j))
+                        surface.blit(text, text_rect)
                 return draw
             item_button = ShopButton(pygame.Rect(10 + (420 / 3 + 10) * i, 50, 420 / 3, 220), None, make_draw(i))
             self.phase_button[1].add(item_button)
@@ -228,6 +233,10 @@ class Shop(Instance):
             
             item_button = ShopButton(pygame.Rect(10 + (410 / 4 + 10) * i, 280, 410 / 4, 30), make_callback(item_button, cost, random_numbers[i]), make_draw(cost))
             self.phase_button[0].add(item_button)
+
+
+    # def make_skill(self):
+
 
 
 class ShopButton(Instance):

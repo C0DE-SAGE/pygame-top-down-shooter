@@ -13,7 +13,7 @@ class View:
 	MAX_NUM_LIGHT = 60
 	SHAKE_INTERVAL = 3
 	FLASH_DURATION = 10
-	NIGHT_LENGTH = 100
+	NIGHT_LENGTH = 60
 	def __init__(self, target=None):
 		self.rect = pygame.Rect((0, 0), ww.SCREEN_SIZE)
 		self.target = target

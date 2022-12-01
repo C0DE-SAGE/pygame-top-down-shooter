@@ -18,7 +18,8 @@ class Player(LifeInstance, BrightInstance):
 		# 변동된 값 #
 		self.hp = self.stat.mhp # 현재 체력
 		self.gold = 1000 # 현재 골드
-		self.skill_point = 0 # 현재 골드
+		self.skill_point = 1
+		self.skill_level = [0, 0, 0]
 		self.items_tier3 = [0 for _ in range(len(items_tier3_name))] # 획득한 아이템
 
 		self.m1Attack_time = 0
@@ -95,8 +96,9 @@ class Player(LifeInstance, BrightInstance):
 			self.image_index = 0
 			
 		self.m1Attack_time = max(self.m1Attack_time - self.stat.atk_firerate / ww.FPS, 0)
-		self.m2Attack_time = max(self.m2Attack_time - self.stat.atk_firerate / 30 / ww.FPS, 0)
-		self.shift_time = max(self.shift_time - self.stat.atk_firerate / 30 / ww.FPS, 0)
+		
+		self.m2Attack_time = max(self.m2Attack_time - 1 / (13 - (ww.player.skill_level[1]) // 2 * 0.5) / ww.FPS, 0)
+		self.shift_time = max(self.shift_time - 1 / (25 - ww.player.skill_level[2] * 0.7) / ww.FPS, 0)
 
 	def kill(self):
 		ww.group.add(PlayerDeath(self))
