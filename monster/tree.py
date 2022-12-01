@@ -16,6 +16,13 @@ class Tree(LifeInstance):
 		self.attack = 1
 		self.gold = 5
 
+	def apply_wave_strength(self):
+		self.hp *= 1 + 0.1 * (ww.wave - 1)
+		self.attack *= 1 + 0.1 * (ww.wave - 1)
+		if ww.wave > 10:
+			self.hp += (ww.wave - 10) * 2
+			self.attack += (ww.wave - 10) * 2
+
 	def update(self):
 		if ww.phase == ww.PHASE.PLAY:
 			vel = ww.player.pos - self.pos
@@ -60,41 +67,45 @@ class Slime(Tree):
 		super().__init__(pos)
 		self.sprite_index = ww.sprites['슬라임']
 		self.normals_index = None
-		self.mhp = 9
+		self.mhp = 7
 		self.speed = 3
 		self.attack = 1
-		self.gold = 3
+		self.gold = 2
 		self.hp = self.mhp
+		self.apply_wave_strength()
 
 class Bat(Tree):
 	def __init__(self, pos):
 		super().__init__(pos)
 		self.sprite_index = ww.sprites['박쥐']
 		self.normals_index = None
-		self.mhp = 5
+		self.mhp = 4
 		self.speed = 5
 		self.attack = 1
-		self.gold = 2
+		self.gold = 1
 		self.hp = self.mhp
+		self.apply_wave_strength()
 
 class Wolf(Tree):
 	def __init__(self, pos):
 		super().__init__(pos)
 		self.sprite_index = ww.sprites['늑대']
 		self.normals_index = None
-		self.mhp = 14
+		self.mhp = 11
 		self.speed = 6
 		self.attack = 1
-		self.gold = 6
+		self.gold = 4
 		self.hp = self.mhp
+		self.apply_wave_strength()
 
 class Skelleton(Tree):
 	def __init__(self, pos):
 		super().__init__(pos)
 		self.sprite_index = ww.sprites['스켈레톤']
 		self.normals_index = None
-		self.mhp = 10
+		self.mhp = 8
 		self.speed = 4
 		self.attack = 2
-		self.gold = 5
+		self.gold = 3
 		self.hp = self.mhp
+		self.apply_wave_strength()
