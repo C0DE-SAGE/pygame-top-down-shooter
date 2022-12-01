@@ -13,7 +13,7 @@ class View:
 	MAX_NUM_LIGHT = 60
 	SHAKE_INTERVAL = 3
 	FLASH_DURATION = 10
-	NIGHT_LENGTH = 60 * 60
+	NIGHT_LENGTH = 60 * 30
 	def __init__(self, target=None):
 		self.rect = pygame.Rect((0, 0), ww.SCREEN_SIZE)
 		self.target = target
@@ -346,6 +346,11 @@ class View:
 				text = ww.font12.render(text_string[i], False, (255, 255, 255))
 				rect = pygame.Rect(pygame.Vector2(self.rect.bottomright), (32, 32)).move(-32 * (3 - i), -32).move(-4, -4).move(-self.rect.left, -self.rect.top).move(0, -20)
 				self.pg_post_screen.blit(text, text.get_rect(center=rect.center))
+
+			text = ww.font15.render(f'fps: {ww.FPS}', False, (255, 255, 255))
+			self.pg_post_screen.blit(text, (10, 10))
+			text = ww.font15.render(f'골드: {round(ww.player.gold)}', False, (255, 255, 255))
+			self.pg_post_screen.blit(text, (10, 30))
 
 		self.pg_post_texture.write(self.pg_post_screen.get_view('1'))
 		self.pg_post_texture.swizzle = 'BGRA'

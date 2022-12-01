@@ -13,7 +13,7 @@ WINDOW_SIZE = pygame.Vector2(1920, 1080)
 SCREEN_SIZE = pygame.Vector2(640, 360)
 FPS = 60
 PPM = 20
-DEBUG = True
+DEBUG = False
 
 class PHASE(Enum):
 	TITLE = auto()
