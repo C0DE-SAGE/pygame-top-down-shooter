@@ -3,15 +3,15 @@ import ww
 
 @dataclass()
 class Status:
-	atk = 5
-	atk_firerate = 12
-	speed = 8
-	mhp = 100
-	atk_velocity = 40
-	atk_duration = 20
-	crit = 0.25
-	crit_atk = 1.84
-	gold_earn = 1.3
+    atk = 4
+    atk_firerate = 6
+    speed = 8
+    mhp = 100
+    atk_velocity = 40
+    atk_duration = 20
+    crit = 0.0
+    crit_atk = 1.5
+    gold_earn = 1.0
 
 class Item:
 	pass

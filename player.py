@@ -26,6 +26,8 @@ class Player(LifeInstance, BrightInstance):
 		self.shift_time = 0
 		self.image_index = 0
 
+		self.reroll_cnt = 0
+
 		self.light_diffuse = 0.5
 
 	def apply_item(self):

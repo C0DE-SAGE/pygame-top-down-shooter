@@ -13,6 +13,7 @@ class View:
 	MAX_NUM_LIGHT = 60
 	SHAKE_INTERVAL = 3
 	FLASH_DURATION = 10
+	NIGHT_LENGTH = 100
 	def __init__(self, target=None):
 		self.rect = pygame.Rect((0, 0), ww.SCREEN_SIZE)
 		self.target = target
@@ -26,6 +27,7 @@ class View:
 		self.flash_t = View.FLASH_DURATION
 
 		self.time = 0
+		self.ambient = [0.3, 0.3, 0.3]
 
 		self.bg = ww.backgrounds['stage1']
 		self.screen_quad = np.array([[-1, 1], [1, 1], [1, -1], [-1, -1]])
@@ -190,9 +192,16 @@ class View:
 
 		if ww.phase == ww.PHASE.PLAY:
 			self.time += 1
-		if self.time >= 60:
+			self.ambient[0] = max(self.ambient[0] - 0.004, 0.3)
+			self.ambient[1] = max(self.ambient[1] - 0.004, 0.3)
+			self.ambient[2] = max(self.ambient[2] - 0.004, 0.3)
+		if self.time >= View.NIGHT_LENGTH:
 			ww.phase = ww.PHASE.SHOP
 			ww.group.add(Shop(self.rect.center))
+		if ww.phase == ww.PHASE.SHOP:
+			self.ambient[0] = min(self.ambient[0] + 0.004, 0.8)
+			self.ambient[1] = min(self.ambient[1] + 0.004, 0.8)
+			self.ambient[2] = min(self.ambient[2] + 0.004, 0.8)
 
 			self.time = 0
 		self.debug_text.append(self.time)
@@ -254,9 +263,9 @@ class View:
 				hp_rect = hp_rect.inflate(-2, -2)
 				hp_rect.width *= sprite.hp / sprite.mhp
 				pygame.draw.rect(self.pg_screen, (255, 0, 0), hp_rect, 0, 5)
-			if isinstance(sprite, DamageNumber):
-				text = ww.font12.render(str(round(sprite.num)), False, (0, 0, 0))
-				self.pg_screen.blit(text, sprite.pos - (self.rect.left, self.rect.top))
+			# if isinstance(sprite, DamageNumber):
+			# 	text = ww.font12.render(str(round(sprite.num)), False, (0, 0, 0))
+			# 	self.pg_screen.blit(text, sprite.pos - (self.rect.left, self.rect.top))
 			if hasattr(sprite, 'draw'):
 				sprite.draw(self.pg_screen)
 		if ww.phase == ww.PHASE.PLAY:
@@ -264,6 +273,8 @@ class View:
 			self.pg_screen.blit(text, text.get_rect(midtop=(ww.SCREEN_SIZE[0] / 2, 0)))
 			text = ww.font20.render(f'{ww.wave}', False, (255, 255, 255))
 			self.pg_screen.blit(text, text.get_rect(midtop=(ww.SCREEN_SIZE[0] / 2, 16)))
+			text = ww.font15.render(f'{int((View.NIGHT_LENGTH - self.time) / 60)}', False, (255, 255, 255))
+			self.pg_screen.blit(text, text.get_rect(midtop=(ww.SCREEN_SIZE[0] / 2, 36)))
 
 		if ww.DEBUG:
 			for sprite in ww.group:
@@ -304,7 +315,7 @@ class View:
 				break
 		self.shader_light['numLight'].value = numLight
 		self.shader_light['flashColor'].value = 1, 1, 1, self.flash
-		self.shader_light['ambient'].value = 0.3, 0.3, 0.3
+		self.shader_light['ambient'].value = self.ambient
 
 		# UI Layers
 		self.ui_layer_fbo.clear(0, 0, 0, 0)
@@ -327,7 +338,7 @@ class View:
 
 		self.pg_post_screen.fill((0, 0, 0, 0))
 		if ww.phase == ww.PHASE.PLAY:
-			text = ww.font12.render(f'{ww.player.hp} / {ww.player.stat.mhp}', False, (0, 0, 0))
+			text = ww.font12.render(f'{round(ww.player.hp)} / {round(ww.player.stat.mhp)}', False, (0, 0, 0))
 			quad = pygame.Rect((0, 0), (192, 24)).move(0, ww.SCREEN_SIZE[1] - 24).move(4, -4)
 			self.pg_post_screen.blit(text, text.get_rect(center=quad.center))
 			text_string = ['M1', 'M2', 'Shift', 'R']

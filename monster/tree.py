@@ -11,7 +11,7 @@ class Tree(LifeInstance):
 		self.sprite_index = ww.sprites['tree_idle']
 		self.normals_index = ww.sprites['tree_idle_normal']
 		self.speed = 5
-		self.mhp = 5
+		self.mhp = 10
 		self.hp = self.mhp
 		self.attack = 1
 		self.gold = 5

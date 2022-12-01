@@ -37,25 +37,25 @@ class Shop(Instance):
             surface.blit(text, text_rect)
         def callback(s):
             self.phase_set(0)
-        item_button = ShopButton(pygame.Rect(100, 10, 80, 30), callback, draw)
+        item_button = ShopButton(pygame.Rect(10, 10, 80, 30), callback, draw)
         ww.group.add(item_button)
 
-        def draw(self, surface):
-            text = ww.font20.render('음식', False, (0, 0, 0))
-            text_rect = text.get_rect(center=self.rect.center)
-            surface.blit(text, text_rect)
-        def callback(s):
-            self.phase_set(1)
-        item_button = ShopButton(pygame.Rect(190, 10, 80, 30), callback, draw)
-        ww.group.add(item_button)
+        # def draw(self, surface):
+        #     text = ww.font20.render('음식', False, (0, 0, 0))
+        #     text_rect = text.get_rect(center=self.rect.center)
+        #     surface.blit(text, text_rect)
+        # def callback(s):
+        #     self.phase_set(1)
+        # item_button = ShopButton(pygame.Rect(190, 10, 80, 30), callback, draw)
+        # ww.group.add(item_button)
 
         def draw(self, surface):
             text = ww.font20.render('스킬강화', False, (0, 0, 0))
             text_rect = text.get_rect(center=self.rect.center)
             surface.blit(text, text_rect)
         def callback(s):
-            self.phase_set(2)
-        item_button = ShopButton(pygame.Rect(280, 10, 80, 30), callback, draw)
+            self.phase_set(1)
+        item_button = ShopButton(pygame.Rect(100, 10, 80, 30), callback, draw)
         ww.group.add(item_button)
 
         def draw(self, surface):
@@ -94,11 +94,89 @@ class Shop(Instance):
         ww.group.add(item_button)
 
         self.phase_button = [
-            [], [], []
+            set(), set()
         ]
 
+        self.reroll_cnt = 0
+        self.reroll_item()
+
+        skill_name = ['기본공격', '강공격', '이동기']
+        for i in range(3):
+            def make_draw(i):
+                def draw(self, surface):
+                    text = ww.font20.render(f'{skill_name[i]}', False, (0, 0, 0))
+                    text_rect = text.get_rect(center=pygame.Vector2(self.rect.center) - (0, 90))
+                    surface.blit(text, text_rect)
+                    img = ww.sprites['skill'][i]
+                    img = pygame.transform.scale2x(img)
+                    surface.blit(img, img.get_rect(center=self.pos - (0, 60)))
+                    text = ww.font15.render(f'효과', False, (0, 0, 0))
+                    text_rect = text.get_rect(center=pygame.Vector2(self.rect.center) - (0, 30))
+                    surface.blit(text, text_rect)
+                    # for j, info in enumerate(items[i].info):
+                    #     text = ww.font15.render(f'{info}', False, (0, 0, 0))
+                    #     text_rect = text.get_rect(center=pygame.Vector2(self.rect.center) - (0, 0 - 15 * j))
+                    #     surface.blit(text, text_rect)
+                return draw
+            item_button = ShopButton(pygame.Rect(10 + (420 / 3 + 10) * i, 50, 420 / 3, 220), None, make_draw(i))
+            self.phase_button[1].add(item_button)
+            
+
+            def make_draw():
+                def draw(self, surface):
+                    text = ww.font20.render(f'강화 1', False, (0, 0, 0))
+                    text_rect = text.get_rect(center=pygame.Vector2(self.rect.center))
+                    surface.blit(text, text_rect)
+                return draw
+
+            def make_callback(i):
+                def callback(s):
+                    if ww.player.skill_point >= 1:
+                        # item_button.kill()
+                        # s.kill()
+                        # self.phase_button[0].discard(item_button)
+                        # self.phase_button[0].discard(s)
+                        ww.player.skill_point -= 1
+                        ww.player.skill_level[i] += 1
+                        # ww.player.apply_item()
+                return callback
+            
+            item_button = ShopButton(pygame.Rect(10 + (420 / 3 + 10) * i, 280, 420 / 3, 30), make_callback(i), make_draw())
+            self.phase_button[1].add(item_button)
+
+        self.phase_set(0)
+
+
+    def phase_set(self, phase):
+        self.phase = phase
+        for group in self.phase_button:
+            for sprite in group:
+                sprite.kill()
+        for sprite in self.phase_button[phase]:
+            ww.group.add(sprite)
+
+
+    def reroll_item(self):
+        self.phase_button[0].clear()
         random_numbers = np.random.choice(len(item.items_tier3_name), 4, replace=False)
         items = [item.ItemTier3(number) for number in random_numbers]
+        def draw(s, surface):
+            cost = 1 + ww.player.reroll_cnt * (ww.player.reroll_cnt // 6)
+            text = ww.font20.render(f'새로고침 {cost}', False, (0, 0, 0))
+            text_rect = text.get_rect(center=s.rect.center)
+            surface.blit(text, text_rect)
+        def callback(s):
+            cost = 1 + ww.player.reroll_cnt * (ww.player.reroll_cnt // 6)
+            if ww.player.gold >= cost:
+                ww.player.gold -= cost
+                ww.player.reroll_cnt += 1
+                for group in self.phase_button:
+                    for sprite in group:
+                        sprite.kill()
+                self.reroll_item()
+                self.phase_set(0)
+        item_button = ShopButton(pygame.Rect(340, 10, 110, 30), callback, draw)
+        self.phase_button[0].add(item_button)
 
         for i in range(4):
             def make_draw(i):
@@ -116,7 +194,7 @@ class Shop(Instance):
                         surface.blit(text, text_rect)
                 return draw
             item_button = ShopButton(pygame.Rect(10 + (410 / 4 + 10) * i, 50, 410 / 4, 220), None, make_draw(i))
-            self.phase_button[0].append(item_button)
+            self.phase_button[0].add(item_button)
             
             cost = 0
             if items[i].tier == 3:
@@ -137,27 +215,19 @@ class Shop(Instance):
                 return draw
 
             def make_callback(item_button, cost, i):
-                def callback(self):
+                def callback(s):
                     if ww.player.gold >= cost:
                         item_button.kill()
-                        self.kill()
+                        s.kill()
+                        self.phase_button[0].discard(item_button)
+                        self.phase_button[0].discard(s)
                         ww.player.gold -= cost
                         ww.player.items_tier3[i] += 1
                         ww.player.apply_item()
                 return callback
             
             item_button = ShopButton(pygame.Rect(10 + (410 / 4 + 10) * i, 280, 410 / 4, 30), make_callback(item_button, cost, random_numbers[i]), make_draw(cost))
-            self.phase_button[0].append(item_button)
-            
-        self.phase_set(0)
-
-    def phase_set(self, phase):
-        self.phase = phase
-        for group in self.phase_button:
-            for sprite in group:
-                sprite.kill()
-        for sprite in self.phase_button[phase]:
-            ww.group.add(sprite)
+            self.phase_button[0].add(item_button)
 
 
 class ShopButton(Instance):
