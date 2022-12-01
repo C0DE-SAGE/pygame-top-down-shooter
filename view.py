@@ -13,7 +13,7 @@ class View:
 	MAX_NUM_LIGHT = 60
 	SHAKE_INTERVAL = 3
 	FLASH_DURATION = 10
-	NIGHT_LENGTH = 60
+	NIGHT_LENGTH = 60 * 60
 	def __init__(self, target=None):
 		self.rect = pygame.Rect((0, 0), ww.SCREEN_SIZE)
 		self.target = target
@@ -198,7 +198,7 @@ class View:
 		if self.time >= View.NIGHT_LENGTH:
 			ww.phase = ww.PHASE.SHOP
 			ww.group.add(Shop(self.rect.center))
-		if ww.phase == ww.PHASE.SHOP:
+		if ww.phase == ww.PHASE.SHOP or ww.phase == ww.PHASE.TITLE:
 			self.ambient[0] = min(self.ambient[0] + 0.004, 0.8)
 			self.ambient[1] = min(self.ambient[1] + 0.004, 0.8)
 			self.ambient[2] = min(self.ambient[2] + 0.004, 0.8)

@@ -34,6 +34,11 @@ class Tree(LifeInstance):
 				ce.other.userData.image_color_mul = 0, 0, 0, 1
 				ce.other.userData.image_color_add = 1, 1, 1, 0
 				break
+		
+		if vel.x > 0:
+			self.image_scale.x = 1
+		if vel.x < 0:
+			self.image_scale.x = -1
 
 		super().update()
 
@@ -48,3 +53,48 @@ class Tree(LifeInstance):
 		ww.player.hp = min(ww.player.hp + ww.player.items_tier3[9], ww.player.stat.mhp)
 		pygame.mixer.find_channel(True).play(ww.sounds['dead'])
 		super().dead()
+
+
+class Slime(Tree):
+	def __init__(self, pos):
+		super().__init__(pos)
+		self.sprite_index = ww.sprites['슬라임']
+		self.normals_index = None
+		self.mhp = 9
+		self.speed = 3
+		self.attack = 1
+		self.gold = 3
+		self.hp = self.mhp
+
+class Bat(Tree):
+	def __init__(self, pos):
+		super().__init__(pos)
+		self.sprite_index = ww.sprites['박쥐']
+		self.normals_index = None
+		self.mhp = 5
+		self.speed = 5
+		self.attack = 1
+		self.gold = 2
+		self.hp = self.mhp
+
+class Wolf(Tree):
+	def __init__(self, pos):
+		super().__init__(pos)
+		self.sprite_index = ww.sprites['늑대']
+		self.normals_index = None
+		self.mhp = 14
+		self.speed = 6
+		self.attack = 1
+		self.gold = 6
+		self.hp = self.mhp
+
+class Skelleton(Tree):
+	def __init__(self, pos):
+		super().__init__(pos)
+		self.sprite_index = ww.sprites['스켈레톤']
+		self.normals_index = None
+		self.mhp = 10
+		self.speed = 4
+		self.attack = 2
+		self.gold = 5
+		self.hp = self.mhp

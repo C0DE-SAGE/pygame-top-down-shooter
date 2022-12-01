@@ -17,7 +17,7 @@ class Player(LifeInstance, BrightInstance):
 
 		# 변동된 값 #
 		self.hp = self.stat.mhp # 현재 체력
-		self.gold = 1000 # 현재 골드
+		self.gold = 0 # 현재 골드
 		self.skill_point = 1
 		self.skill_level = [0, 0, 0]
 		self.items_tier3 = [0 for _ in range(len(items_tier3_name))] # 획득한 아이템

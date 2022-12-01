@@ -6,13 +6,14 @@ from monster import *
 from player import Player
 from m1Attack import M1Attack, M2Attack
 from enum import IntEnum, Enum, auto
+from monster.tree import *
 
 WINDOW_SIZE = pygame.Vector2(1920, 1080)
 # WINDOW_SIZE = pygame.Vector2(1280, 720)
 SCREEN_SIZE = pygame.Vector2(640, 360)
 FPS = 60
 PPM = 20
-DEBUG = False
+DEBUG = True
 
 class PHASE(Enum):
 	TITLE = auto()
@@ -120,6 +121,22 @@ fixture_defs = {
 		shape=Box2D.b2PolygonShape(vertices=_get_ellipsis_vertices(basic_sprite[Player])),
 	),
 	Tree: Box2D.b2FixtureDef(
+		density=0.1, categoryBits=CategoryBits.MONSTER, maskBits=CategoryBits.PLAYER | CategoryBits.MONSTER | CategoryBits.BULLET,
+		shape=Box2D.b2PolygonShape(vertices=_get_ellipsis_vertices(basic_sprite[Tree])),
+	),
+	Slime: Box2D.b2FixtureDef(
+		density=0.1, categoryBits=CategoryBits.MONSTER, maskBits=CategoryBits.PLAYER | CategoryBits.MONSTER | CategoryBits.BULLET,
+		shape=Box2D.b2PolygonShape(vertices=_get_ellipsis_vertices(basic_sprite[Tree])),
+	),
+	Bat: Box2D.b2FixtureDef(
+		density=0.1, categoryBits=CategoryBits.MONSTER, maskBits=CategoryBits.PLAYER | CategoryBits.MONSTER | CategoryBits.BULLET,
+		shape=Box2D.b2PolygonShape(vertices=_get_ellipsis_vertices(basic_sprite[Tree])),
+	),
+	Wolf: Box2D.b2FixtureDef(
+		density=0.1, categoryBits=CategoryBits.MONSTER, maskBits=CategoryBits.PLAYER | CategoryBits.MONSTER | CategoryBits.BULLET,
+		shape=Box2D.b2PolygonShape(vertices=_get_ellipsis_vertices(basic_sprite[Tree])),
+	),
+	Skelleton: Box2D.b2FixtureDef(
 		density=0.1, categoryBits=CategoryBits.MONSTER, maskBits=CategoryBits.PLAYER | CategoryBits.MONSTER | CategoryBits.BULLET,
 		shape=Box2D.b2PolygonShape(vertices=_get_ellipsis_vertices(basic_sprite[Tree])),
 	),
