@@ -11,3 +11,14 @@ Sejong Univ. seminar project with pygame
 ## Run game in python   
 ### 1. pip install -r requirements.txt   
 ### 2. python main.py
+   
+## Game Title
+![image](https://user-images.githubusercontent.com/82719310/205867741-15212cc4-df1a-47b1-8d32-efc9a46d4d6d.png)
+
+## In Game - Night
+![image](https://user-images.githubusercontent.com/82719310/205868262-3466a9af-bdd1-453b-9822-39d9ba529f1e.png)
+
+## In Game - Day
+
+## Game Over
+![image](https://user-images.githubusercontent.com/82719310/205868372-f0d8f025-2a53-48e0-af3c-b34408c81f2c.png)
