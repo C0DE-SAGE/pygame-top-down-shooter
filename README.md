@@ -16,7 +16,7 @@ Sejong Univ. seminar project with pygame
 ![image](https://user-images.githubusercontent.com/82719310/205867741-15212cc4-df1a-47b1-8d32-efc9a46d4d6d.png)
 
 ## In Game - Night
-![image](https://user-images.githubusercontent.com/82719310/205868262-3466a9af-bdd1-453b-9822-39d9ba529f1e.png)
+![image](https://user-images.githubusercontent.com/82719310/205868799-ce8ab4f0-b540-46d8-9d2e-64d555aad35b.png)
 
 ## In Game - Day
 ![image](https://user-images.githubusercontent.com/82719310/205868707-b6caea10-1ea1-4619-b9d8-f9fb1b30d009.png)
