@@ -19,6 +19,7 @@ Sejong Univ. seminar project with pygame
 ![image](https://user-images.githubusercontent.com/82719310/205868262-3466a9af-bdd1-453b-9822-39d9ba529f1e.png)
 
 ## In Game - Day
+![image](https://user-images.githubusercontent.com/82719310/205868707-b6caea10-1ea1-4619-b9d8-f9fb1b30d009.png)
 
 ## Game Over
 ![image](https://user-images.githubusercontent.com/82719310/205868372-f0d8f025-2a53-48e0-af3c-b34408c81f2c.png)
