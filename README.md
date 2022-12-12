@@ -1,5 +1,8 @@
 # Pygame-project
-Sejong Univ. seminar project with pygame
+## Notion  
+https://deeply-guide-979.notion.site/C0DE-SAGE-b574b87fc36e484dbe8811ada4a3a279  
+###Sejong Univ. seminar project with pygame  
+
 
 <table>
 	<tr>
